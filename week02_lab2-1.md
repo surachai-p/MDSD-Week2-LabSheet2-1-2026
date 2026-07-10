@@ -1071,9 +1071,7 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
-// ===============================
-// ข้อ 1: BankAccount และ CheckingAccount
-// ===============================
+
 
 class BankAccount {
   final String ownerName;
