@@ -277,9 +277,63 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+// เพิ่มรายวิชา Database
 
+courses.add("Database");
+
+courseScores["Database"] = 88;
+
+
+
+// หาวิชาที่มีคะแนนสูงสุด
+
+var topCourse = courseScores.entries.reduce(
+
+  (a, b) => a.value > b.value ? a : b,
+
+);
+
+
+
+print(
+
+  "วิชาที่ได้คะแนนสูงสุด: ${topCourse.key} (${topCourse.value} คะแนน)"
+
+);
+
+
+
+// นับจำนวนวิชาที่ได้คะแนน >= 90
+
+int count = courseScores.values
+
+    .where((score) => score >= 90)
+
+    .length;
+
+
+
+print("จำนวนวิชาที่ได้ >= 90: $count วิชา");
+
+
+
+// สร้าง Set เก็บวิชาที่ได้คะแนน >= 80
+
+Set<String> passedCourses = courseScores.entries
+
+    .where((e) => e.value >= 80)
+
+    .map((e) => e.key)
+
+    .toSet();
+
+
+
+print("วิชาที่ผ่าน: $passedCourses");
 
 ```
+<img width="1902" height="662" alt="image" src="https://github.com/user-attachments/assets/6ef131ff-d858-4319-b1bd-caedeb12833d" />
+
 ---
 
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
