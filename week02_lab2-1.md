@@ -281,9 +281,67 @@ void main() {
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+void main() {
+  // === บล็อกที่ 1: ชนิดข้อมูลพื้นฐาน ===
+  String studentName = "สมชาย ดีใจ";
+  int studentAge = 20;
+  double gpa = 3.75;
+  bool isEnrolled = true;
 
+  print("=== ข้อมูลนักศึกษา ===");
+  print("ชื่อ: $studentName");
+  print("อายุ: $studentAge ปี");
+  print("GPA: $gpa");
+  print("ลงทะเบียนแล้ว: $isEnrolled");
+  print("ปีเกิด (ประมาณ): ${2026 - studentAge}");
+  
+    // === บล็อกที่ 2: Null Safety ===
+  print("\n=== Null Safety ===");
+  String? nickname = null;
+  print("ชื่อเล่น: ${nickname ?? 'ไม่มี'}");  // → ไม่มี
 
+  nickname = "ชาย";
+  print("ชื่อเล่น: ${nickname ?? 'ไม่มี'}");  // → ชาย
+  print("ความยาว: ${nickname?.length}");       // → 3
+  print("ตัวพิมพ์ใหญ่: ${nickname?.toUpperCase()}"); // → ชาย
+  
+    // === บล็อกที่ 3: List ===
+  print("\n=== รายวิชาที่ลงทะเบียน ===");
+  List<String> courses = ["Mobile Dev", "Web Dev", "AI", "Database"];
+  Map<String, int> courseScores = {
+    "Mobile Dev": 90,
+    "Web Dev": 85,
+    "AI": 92,
+    "Database": 88,
+  };
+
+  // วนซ้ำแสดงรายวิชาและคะแนน
+  for (int i = 0; i < courses.length; i++) {
+    String course = courses[i];
+    int? score = courseScores[course];
+    print("${i + 1}. $course: ${score ?? 'ยังไม่มีคะแนน'} คะแนน");
+  }
+
+  // คำนวณเฉลี่ย
+  int total = courseScores.values.reduce((a, b) => a + b);
+  double avg = total / courseScores.length;
+  print("คะแนนเฉลี่ย: ${avg.toStringAsFixed(2)}\n");
+
+  // หาวิชาที่ได้คะแนนสูงสุด
+  var maxCourse = courseScores.entries.reduce((a, b) => a.value > b.value ? a : b);
+  print("วิชาที่ได้คะแนนสูงสุด: ${maxCourse.key} (${maxCourse.value} คะแนน)");
+
+  // นับจำนวนวิชาที่ได้ >= 90
+  int countTopCourses = courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $countTopCourses วิชา");
+
+  // วิชาที่ผ่าน (>= 80)
+  Set<String> passedCourses = courseScores.entries
+      .where((entry) => entry.value >= 80)
+      .map((entry) => entry.key)
+      .toSet();
+  print("วิชาที่ผ่าน: $passedCourses");
+}
 ```
 ---
 
