@@ -646,9 +646,101 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+String findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+  var facultyStudents = students.where((s) => s["faculty"] == faculty).toList();
+  if (facultyStudents.isEmpty) return "ไม่มีข้อมูล";
+  var topStudent = facultyStudents.reduce((a, b) => (a["gpa"] as double) > (b["gpa"] as double) ? a : b);
+  return topStudent["name"];
+}
 
+Map<String, List<Map<String, dynamic>>> groupByFaculty(List<Map<String, dynamic>> students) {
+  Map<String, List<Map<String, dynamic>>> grouped = {};
+  for (var s in students) {
+    String faculty = s["faculty"];
+    if (!grouped.containsKey(faculty)) {
+      grouped[faculty] = [];
+    }
+    grouped[faculty]!.add(s);
+  }
+  return grouped;
+}
 
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === where() — กรองนักศึกษาที่ GPA >= 3.0 ===
+  print("=== นักศึกษาที่ GPA >= 3.0 ===");
+  var honorStudents = students
+      .where((s) => (s["gpa"] as double) >= 3.0)
+      .toList();
+  for (var s in honorStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  // === map() — แปลงเป็น String รายงาน ===
+  print("\n=== รายงานนักศึกษา ===");
+  var report = students
+      .map((s) => "${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}")
+      .toList();
+  report.forEach(print);
+
+  // === sort() + reduce() ===
+  print("\n=== วิเคราะห์คะแนน ===");
+  List<double> gpas = students.map((s) => s["gpa"] as double).toList();
+
+  double maxGpa = gpas.reduce((a, b) => a > b ? a : b);
+  double minGpa = gpas.reduce((a, b) => a < b ? a : b);
+  double avgGpa = gpas.reduce((a, b) => a + b) / gpas.length;
+
+  print("GPA สูงสุด: $maxGpa");
+  print("GPA ต่ำสุด: $minGpa");
+  print("GPA เฉลี่ย: ${avgGpa.toStringAsFixed(2)}");
+
+  // === any() และ every() ===
+  bool anyFailing = students.any((s) => (s["gpa"] as double) < 2.0);
+  bool allPassing = students.every((s) => (s["gpa"] as double) >= 2.0);
+  print("มีนักศึกษาที่ GPA < 2.0: $anyFailing");
+  print("ทุกคน GPA >= 2.0: $allPassing");
+
+  // ทดลองเพิ่มเอง: กรองเฉพาะคณะวิศวกรรม
+  print("\n=== นักศึกษาคณะวิศวกรรม ===");
+  var engineeringStudents = students
+      .where((s) => s["faculty"] == "วิศวกรรม")
+      .toList();
+  // พิมพ์ชื่อและ GPA ของนักศึกษาแต่ละคน
+  for (var s in engineeringStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  // === โจทย์ฝึกทำ 2 ===
+  print("\n=== โจทย์ฝึกทำ 2 ===");
+  
+  // 1. หา Top Student 
+  print("Top วิศวกรรม: ${findTopStudentByFaculty(students, 'วิศวกรรม')}");
+  
+  // 2. จัดกลุ่มตามคณะ
+  print("\nจัดกลุ่มตามคณะ:");
+  var grouped = groupByFaculty(students);
+  grouped.forEach((faculty, list) {
+    print("- $faculty: ${list.map((s) => s['name']).join(', ')}");
+  });
+
+  // 3. เรียง GPA สูงสุด 3 อันดับแรก
+  print("\nTop 3 นักศึกษาที่มี GPA สูงสุด:");
+  var sortedStudents = List<Map<String, dynamic>>.from(students);
+  sortedStudents.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+  var top3 = sortedStudents.take(3).toList();
+  for (int i = 0; i < top3.length; i++) {
+    print("  ${i + 1}. ${top3[i]['name']} (GPA: ${top3[i]['gpa']})");
+  }
+}
 ```
 ---
 
