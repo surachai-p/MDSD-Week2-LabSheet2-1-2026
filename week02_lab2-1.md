@@ -1595,6 +1595,8 @@ void main() async {
 
 **ขั้นตอนที่ 2** กด Run สังเกตว่าราคาออกมาทีละค่า ไม่ใช่ทั้งหมดพร้อมกัน
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/2c8a17bf-30ee-4db3-bbd1-d86b51628762" />
+
 ---
 
 ### 🎯 โจทย์ฝึกทำ 4 — เขียน Async ด้วยตนเอง
