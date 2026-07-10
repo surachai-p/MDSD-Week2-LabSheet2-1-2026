@@ -211,6 +211,9 @@ void main() {
 
 **ขั้นตอนที่ 3** กด **Run** ตรวจสอบผลลัพธ์ที่ได้
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/21466335-28ea-4abd-ae4b-9f294994bbd9" />
+
+---
 **ขั้นตอนที่ 4** เพิ่มโค้ดต่อไปนี้ **ต่อท้าย** ภายใน `main()` ก่อนปิด `}`
 
 ```dart
@@ -227,6 +230,9 @@ void main() {
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง สังเกตผลลัพธ์ที่เพิ่มขึ้น
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/138e4807-4a71-4b49-a5d5-4786ed5d2dc8" />
+
+---
 **ขั้นตอนที่ 6** เพิ่มโค้ด Collections ต่อท้าย
 
 ```dart
@@ -253,6 +259,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/ca2b750c-fcf3-4d3c-a246-43df444a640f" />
 
 ---
 
