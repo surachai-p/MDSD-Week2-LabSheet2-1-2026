@@ -615,6 +615,9 @@ void main() {
 
 **ขั้นตอนที่ 2** กด Run และอ่านผลลัพธ์ทุกส่วน
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/5bf4f47c-8e02-409c-b649-206efe2a5d83" />
+
+---
 **ขั้นตอนที่ 3** เพิ่มโค้ดต่อท้ายใน `main()` เพื่อกรองนักศึกษาเฉพาะคณะ "วิศวกรรม" แล้วแสดงผล
 
 ```dart
@@ -628,6 +631,8 @@ void main() {
     print("  ${s["name"]}: ${s["gpa"]}");
   }
 ```
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/333b9490-6ff5-49ef-a460-65b533c7d6ad" />
 
 ---
 
