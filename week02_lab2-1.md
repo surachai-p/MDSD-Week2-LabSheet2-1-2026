@@ -1609,9 +1609,109 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+// Stream Generator ด้วย async*
+Stream<double> simulateStockPrice(String symbol) async* {
+  double price = 100.0;
+  int ticks = 0;
 
+  while (ticks < 5) {
+    await Future.delayed(Duration(milliseconds: 500));
+
+    // จำลองการเปลี่ยนราคา
+    double change = (ticks % 2 == 0) ? 2.5 : -1.5;
+    price += change;
+    ticks++;
+
+    yield price; // ส่งค่าออกทาง Stream
+  }
+}
+
+// --- โจทย์ฝึกทำ 4.1 ---
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+  double tax = 0;
+  if (income > 500000) {
+    tax += (income - 500000) * 0.20;
+    income = 500000;
+  }
+  if (income > 300000) {
+    tax += (income - 300000) * 0.10;
+    income = 300000;
+  }
+  if (income > 150000) {
+    tax += (income - 150000) * 0.05;
+    income = 150000;
+  }
+  return tax;
+}
+
+Future<double> fetchIncome(int userId) async {
+  await Future.delayed(Duration(milliseconds: 300));
+  if (userId == 1) return 120000;
+  if (userId == 2) return 450000;
+  return 800000;
+}
+
+// --- โจทย์ฝึกทำ 4.3 ---
+Stream<String> simulateChat() async* {
+  List<String> msgs = [
+    "User1: สวัสดีครับ",
+    "User2: สวัสดี มีอะไรให้ช่วยไหม?",
+    "User1: อยากสอบถามเรื่อง Async ครับ",
+    "User2: ได้เลย ถามมาได้เลย",
+    "User1: ขอบคุณครับ"
+  ];
+  for (var m in msgs) {
+    await Future.delayed(Duration(seconds: 1));
+    yield m;
+  }
+}
+
+void main() async {
+  print("=== ราคาหุ้น (Stream) ===");
+  print("Symbol: DART\n");
+
+  double? lastPrice;
+
+  await for (double price in simulateStockPrice("DART")) {
+    String direction = "";
+    if (lastPrice != null) {
+      direction = price > lastPrice! ? "📈 ขึ้น" : "📉 ลง";
+    }
+    print("ราคา: ${price.toStringAsFixed(2)} บาท  $direction");
+    lastPrice = price;
+  }
+
+  print("\nสิ้นสุดการแสดงราคา");
+
+  // === โจทย์ฝึกทำ 4 ===
+  print("\n=== ทดสอบดึงรายได้และคำนวณภาษี (Parallel) ===");
+  
+  // ดึงรายได้ 3 คนพร้อมกัน
+  var incomes = await Future.wait([
+    fetchIncome(1),
+    fetchIncome(2),
+    fetchIncome(3)
+  ]);
+  
+  print("รายได้ที่ดึงมา: $incomes");
+  
+  double totalTax = 0;
+  for (int i = 0; i < incomes.length; i++) {
+    double tax = await calculateTax(incomes[i]);
+    totalTax += tax;
+    print("User ${i+1} รายได้: ${incomes[i]} -> ภาษี: $tax บาท");
+  }
+  print("รวมภาษีทั้งหมด: $totalTax บาท");
+
+  print("\n=== ทดสอบ Chat Stream ===");
+  await for (String msg in simulateChat()) {
+    print("[💬 New Message] $msg");
+  }
+  print("--- จบการสนทนา ---");
+}
 ```
 ---
 
