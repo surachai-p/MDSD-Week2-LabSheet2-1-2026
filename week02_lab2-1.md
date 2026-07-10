@@ -1087,9 +1087,223 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
 
+  BankAccount({required this.ownerName, double initial = 0})
+      : _balance = initial;
 
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    _balance += amount;
+    _history.add("+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ฝาก ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    if (amount > _balance) {
+      print("❌ ยอดเงินไม่เพียงพอ (มี ${_balance.toStringAsFixed(2)} บาท)");
+      return false;
+    }
+    _balance -= amount;
+    _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอน ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n=== สรุปบัญชี: $ownerName ===");
+    print("ยอดปัจจุบัน: ${_balance.toStringAsFixed(2)} บาท");
+    print("ประวัติรายการ:");
+    if (_history.isEmpty) {
+      print("  (ยังไม่มีรายการ)");
+    } else {
+      _history.forEach((h) => print("  $h"));
+    }
+  }
+
+  @override
+  String toString() => "BankAccount(${ownerName}, ยอด: ${_balance.toStringAsFixed(2)})";
+}
+
+class SavingsAccount extends BankAccount {
+  final double interestRate; // อัตราดอกเบี้ยต่อปี เช่น 0.03 = 3%
+
+  SavingsAccount({
+    required String ownerName,
+    required this.interestRate,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  // Override withdraw เพื่อเพิ่มกฎพิเศษ
+  @override
+  bool withdraw(double amount) {
+    if (_balance - amount < 500) {
+      print("❌ บัญชีออมทรัพย์ต้องมียอดขั้นต่ำ 500 บาท");
+      return false;
+    }
+    return super.withdraw(amount); // เรียก withdraw() ของ BankAccount
+  }
+
+  // Method พิเศษของ SavingsAccount
+  void applyMonthlyInterest() {
+    double interest = _balance * interestRate / 12;
+    _balance += interest;
+    _history.add("+ ดอกเบี้ยรายเดือน ${interest.toStringAsFixed(2)} บาท");
+    print("✅ ดอกเบี้ยเดือนนี้: ${interest.toStringAsFixed(2)} บาท");
+  }
+}
+
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    
+    if (amount <= _balance) {
+      _balance -= amount;
+      _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+      print("✅ ถอน ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+      return true;
+    } else {
+      double overdraft = amount - _balance;
+      if (overdraft > 500) {
+        print("❌ ถอนเงินเกินวงเงิน Overdraft ที่กำหนด (สูงสุด 500 บาท)");
+        return false;
+      }
+      
+      _balance -= amount;
+      _history.add("- ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+      print("✅ ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+      
+      _balance -= 50;
+      _history.add("- ค่าธรรมเนียม Overdraft 50.00 บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+      print("⚠️ หักค่าธรรมเนียม Overdraft 50.00 บาท");
+      return true;
+    }
+  }
+}
+
+abstract class Vehicle {
+  double fuelLevel = 0.0;
+  double get fuelEfficiency; // กม./ลิตร
+
+  void refuel(double liters) {
+    fuelLevel += liters;
+    print("✅ เติมน้ำมัน $liters ลิตร (มีน้ำมันรวม: ${fuelLevel.toStringAsFixed(2)} ลิตร)");
+  }
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (fuelNeeded > fuelLevel) {
+      double maxDist = fuelLevel * fuelEfficiency;
+      print("❌ น้ำมันไม่พอวิ่ง $km กม. (วิ่งได้สูงสุด ${maxDist.toStringAsFixed(2)} กม.)");
+    } else {
+      fuelLevel -= fuelNeeded;
+      print("🚗 ขับไป $km กม. ใช้น้ำมัน ${fuelNeeded.toStringAsFixed(2)} ลิตร (เหลือน้ำมัน: ${fuelLevel.toStringAsFixed(2)} ลิตร)");
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // 15 กม./ลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0; // 8 กม./ลิตร
+}
+
+mixin Discountable {
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    double discountAmount = price * (percent / 100);
+    price -= discountAmount;
+    print("🎯 ลดราคา $percent% (ลดไป ${discountAmount.toStringAsFixed(2)} บาท) คงเหลือ ${price.toStringAsFixed(2)} บาท");
+  }
+}
+
+class Product with Discountable {
+  String name;
+  @override
+  double price;
+
+  Product(this.name, this.price);
+}
+
+void main() {
+  print("=== ทดสอบ BankAccount ===\n");
+  var acc = BankAccount(ownerName: "สมชาย", initial: 1000);
+
+  acc.deposit(500);
+  acc.withdraw(200);
+  acc.withdraw(2000); // เกินยอด
+  acc.withdraw(-100); // ค่าไม่ถูก
+  acc.printStatement();
+
+  print("\n=== ทดสอบ SavingsAccount ===\n");
+  var savings = SavingsAccount(
+    ownerName: "สมหญิง",
+    interestRate: 0.03,
+    initial: 1000,
+  );
+
+  savings.deposit(5000);
+  savings.withdraw(5600); // เหลือน้อยกว่า 500
+  savings.withdraw(3000); // ได้
+  savings.applyMonthlyInterest();
+  savings.printStatement();
+
+  // Polymorphism — ใช้ BankAccount แทนทั้งคู่ได้
+  print("\n=== Polymorphism ===");
+  List<BankAccount> accounts = [acc, savings];
+  for (var account in accounts) {
+    print(account); // เรียก toString() ของแต่ละ Object
+  }
+
+  // --- โจทย์ฝึกทำ 3 ---
+  print("\n=== ทดสอบ CheckingAccount ===");
+  var checking = CheckingAccount(ownerName: "สมหมาย", initial: 1000);
+  checking.withdraw(1200); // เกินยอดไป 200 (อยู่ใน 500) -> โดนหัก 50
+  checking.withdraw(500); // เกิน 500 แล้ว ไม่ให้ถอน
+  checking.printStatement();
+
+  print("\n=== ทดสอบ Vehicle, Car, Truck ===");
+  var myCar = Car();
+  myCar.refuel(10);
+  myCar.drive(100); // ใช้ 100/15 = 6.67 ลิตร
+  myCar.drive(100); // วิ่งต่อ 100 กม. จะไม่พอ
+
+  var myTruck = Truck();
+  myTruck.refuel(20);
+  myTruck.drive(100); // ใช้ 100/8 = 12.5 ลิตร
+
+  print("\n=== ทดสอบ Mixin Discountable ===");
+  var shirt = Product("เสื้อยืด", 500);
+  print("สินค้า: ${shirt.name}, ราคาปกติ: ${shirt.price} บาท");
+  shirt.applyDiscount(20); // ลด 20% -> 400
+}
 ```
 ---
 
