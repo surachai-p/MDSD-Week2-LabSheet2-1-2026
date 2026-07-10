@@ -1068,10 +1068,126 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0}) : _balance = initial;
+  double get balance => _balance;
+
+  bool deposit(double amount) {
+    if (amount <= 0) return false;
+    _balance += amount;
+    _history.add("+ ฝาก $amount (คงเหลือ: $_balance)");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    _history.add("- ถอน $amount (คงเหลือ: $_balance)");
+    return true;
+  }
+}
+
+// ==========================================
+// 1. CheckingAccount 
+// ==========================================
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0}) 
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    // 1. ถอนปกติ: ถ้ายอดเงินพอ ให้ใช้คำสั่งของคลาสแม่ทำงาน
+    if (amount <= balance) return super.withdraw(amount);
+
+    // 2. ถอนเกินบัญชี 
+    if (balance - amount - 50 < -500) {
+      print("ถอนเงินไม่สำเร็จ: เกินวงเงินถอนเกินบัญชี 500 บาท");
+      return false;
+    }
+
+    // 3. หักเงินออกจากบัญชีด้วยยอดติดลบ และหักค่าปรับอีก 50 บาทผ่าน super.deposit()
+    super.deposit(-amount - 50); 
+    print("ยอดเงินไม่พอ: ใช้สิทธิ์ถอนเกินบัญชี (หักค่าธรรมเนียม 50 บาท)");
+    return true;
+  }
+}
+
+// ==========================================
+//  2. Vehicle, Car, Truck 
+// ==========================================
+abstract class Vehicle {
+  double fuelLevel = 0.0;
+  
+  // Abstract getter บังคับให้คลาสลูกระบุ กม./ลิตร
+  double get fuelEfficiency; 
+
+  void refuel(double liters) => fuelLevel += liters;
+
+  void drive(double km) {
+    double fuelUsed = km / fuelEfficiency; // คำนวณการใช้น้ำมันตามโจทย์สั่ง
+    if (fuelUsed > fuelLevel) {
+      print("น้ำมันไม่พอ ขับไม่ได้");
+      return;
+    }
+    fuelLevel -= fuelUsed;
+    print("ขับ $km กม. (ใช้น้ำมัน $fuelUsed ลิตร, เหลือในถัง: $fuelLevel ลิตร)");
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // รถยนต์ 15 กม./ลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 6.0;  // รถบรรทุก 6 กม./ลิตร
+}
+
+// ==========================================
+// 3. Mixin & Product
+// ==========================================
+mixin Discountable {
+  double applyDiscount(double price, double percent) => price * (1 - (percent / 100));
+}
 
 
+class Product with Discountable {
+  String name;
+  double price;
+
+  Product({required this.name, required this.price});
+}
+
+void main() {
+  print("--- ทดสอบข้อ 1 (CheckingAccount) ---");
+  var account = CheckingAccount(ownerName: "สมชาย", initial: 1000);
+  account.withdraw(1400); // ถอน 1400 เงินขาดไป 400 + ค่าปรับ 50 = ยอดติดลบ -450
+  print("ยอดคงเหลือปัจจุบัน: ${account.balance} บาท");
+
+  print("\n--- ทดสอบข้อ 2 (Vehicle) ---");
+  var myCar = Car();
+  myCar.refuel(10); // เติมน้ำมัน 10 ลิตร
+  myCar.drive(120); // ขับ 120 กม. รถยนต์วิ่งได้ 15 กม./ลิตร แปลว่าใช้น้ำมันไป 8 ลิตร
+
+  print("\n--- ทดสอบข้อ 3 (Mixin) ---");
+  var item = Product(name: "เมาส์ Gaming", price: 2000);
+  // เรียกใช้เมธอด applyDiscount ที่ได้มาจาก Mixin ตรงๆ เพื่ออัปเดตราคาสินค้า
+  item.price = item.applyDiscount(item.price, 10); // ลด 10%
+  print("ราคาสินค้า ${item.name} หลังหักส่วนลด: ${item.price} บาท");
+}
 ```
+---
+
+**ผลลัพธ์โจทย์ฝึก 3**
+
+<img width="1864" height="1048" alt="โจทย์ฝึก 3" src="https://github.com/user-attachments/assets/2e34f2cb-fb44-477f-9834-a539e7c0e7db" />
+
+
 ---
 
 ## ส่วนที่ 4 — ทฤษฎีและการทดลอง: Async/Await และ Future
