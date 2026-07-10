@@ -1515,6 +1515,9 @@ void main() async {
 
 **ขั้นตอนที่ 3** กด Run สังเกตความแตกต่างของเวลา
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/b48c708e-d6ca-4648-baa7-7b1c52212942" />
+
+---
 **ขั้นตอนที่ 4** เพิ่ม Error Handling ต่อท้าย `main()`:
 
 ```dart
@@ -1534,11 +1537,13 @@ void main() async {
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง บันทึกผลเวลาของ Sequential vs Parallel
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/14927420-8a42-4479-82b9-8074ed089321" />
+
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 3539 ms
+Parallel ใช้เวลา:   994 ms
+ประหยัดเวลาได้:     2545 ms (71.91%)
 ```
 
 ---
