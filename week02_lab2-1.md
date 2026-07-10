@@ -1485,10 +1485,78 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+
+// ==========================================
+//  [ข้อ 1]: ฟังก์ชันคำนวณภาษีอัตราก้าวหน้าแบบ Async
+// ==========================================
+Future<double> calculateTax(double income) async {
+  // Delay 0.5 วินาที
+  await Future.delayed(Duration(milliseconds: 500));
+
+  // คิดอัตราภาษีก้าวหน้าตามเงื่อนไข
+  if (income <= 150000) return 0.0;
+  if (income <= 300000) return income * 0.05;
+  if (income <= 500000) return income * 0.10;
+  return income * 0.20; // เกิน 500,000 คิด 20%
+}
+
+// ==========================================
+//  [ข้อ 3]: Stream Generator จำลองส่ง Chat Message
+// ==========================================
+Stream<String> simulateChatMessages() async* {
+  for (int i = 1; i <= 5; i++) {
+    // หน่วงเวลาทุกๆ 1 วินาที
+    await Future.delayed(Duration(seconds: 1));
+    yield "ข้อความที่ $i: สวัสดีครับอาจารย์สุระชัย"; // ส่งข้อความออกไปทีละข้อความ
+  }
+}
+
+// ==========================================
+//  [ข้อ 2]: ฟังก์ชันหลัก (รัน Parallel และใช้ await for)
+// ==========================================
+void main() async {
+  print("=== [ทดสอบข้อ 1 และ 2: คำนวณภาษีพร้อมกันด้วย Future.wait] ===");
+  
+  // รายได้ของคน 3 คนที่ต้องการคำนวณ
+  List<double> incomes = [200000, 450000, 600000];
+  print(" กำลังคำนวณภาษีของทั้ง 3 คนพร้อมกัน...");
+  
+  // ยิงคำสั่งคำนวณภาษีของทุกคนไปพร้อมๆ แบบ Parallel
+  List<double> taxes = await Future.wait([
+    calculateTax(incomes[0]),
+    calculateTax(incomes[1]),
+    calculateTax(incomes[2]),
+  ]);
+
+  // แสดงผลภาษีของแต่ละคน
+  print(" คนที่ 1 (รายได้ ${incomes[0]}): ภาษี ${taxes[0]} บาท");
+  print(" คนที่ 2 (รายได้ ${incomes[1]}): ภาษี ${taxes[1]} บาท");
+  print(" คนที่ 3 (รายได้ ${incomes[2]}): ภาษี ${taxes[2]} บาท");
+
+  // รวมยอดภาษีทั้งหมด (ใช้ .reduce บวกแต้มต่อๆ กัน)
+  double totalTax = taxes.reduce((a, b) => a + b);
+  print("\n ยอดรวมภาษีทั้งหมดที่ต้องจ่าย: $totalTax บาท");
 
 
+  print("\n=== [ทดสอบข้อ 3: Stream ด้วย await for] ===");
+ 
+
+  // ใช้ await for ในการสแตนด์บายรอรับข้อมูลแชทที่ทยอยไหลมาจาก Stream ทุกๆ 1 วินาที
+  await for (String message in simulateChatMessages()) {
+    print(message);
+  }
+
+  print("\n สิ้นสุดแชท");
+}
 ```
+---
+
+**ผลลัพธ์โจทย์ฝึก 4**
+
+<img width="1864" height="1048" alt="โจทย์ฝึก 4" src="https://github.com/user-attachments/assets/e44e038f-8c2d-476e-884f-0dfe8337b269" />
+
+
 ---
 
 
