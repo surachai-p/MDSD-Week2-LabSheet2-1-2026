@@ -635,9 +635,84 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// [ข้อ 1]: ฟังก์ชันหานักศึกษาที่ GPA สูงสุดในคณะที่ระบุ
+String findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+  // กรองเอาเฉพาะนักศึกษาที่อยู่คณะที่เลือกออกมาก่อน
+  var facultyStudents = students.where((s) => s["faculty"] == faculty).toList();
+  
+  if (facultyStudents.isEmpty) {
+    return "ไม่พบนักศึกษาในคณะนี้";
+  }
 
+  // ใช้ .reduce() เปรียบเทียบหาคนที่มี gpa มากที่สุด
+  var topStudent = facultyStudents.reduce((a, b) {
+    return (a["gpa"] as double) > (b["gpa"] as double) ? a : b;
+  });
 
+  return topStudent["name"];
+}
+
+// [ข้อ 2]: ฟังก์ชันจัดกลุ่มนักศึกษาตามคณะ
+Map<String, List<Map<String, dynamic>>> groupByFaculty(List<Map<String, dynamic>> students) {
+  Map<String, List<Map<String, dynamic>>> grouped = {};
+
+  // วนลูปอ่านข้อมูลนักศึกษาทีละคนแบบง่ายๆ
+  for (var student in students) {
+    String faculty = student["faculty"];
+
+    // ถ้ายังไม่มีกลุ่มคณะนี้ใน Map ให้สร้าง List ว่างรอไว้ก่อน
+    if (grouped[faculty] == null) {
+      grouped[faculty] = [];
+    }
+    
+    // แอดข้อมูลนักศึกษาเข้าไปในกลุ่มคณะนั้นๆ
+    grouped[faculty]!.add(student);
+  }
+
+  return grouped;
+}
+
+void main() {
+  // ข้อมูลเดิมจากการทดลอง 2.2
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  print("=== ผลลัพธ์โจทย์ฝึกทำ 2 ===");
+
+  // 1. ทดสอบฟังก์ชันหาคนเรียนเก่งสุดรายคณะ
+  String topEng = findTopStudentByFaculty(students, "วิศวกรรม");
+  print("1. นักศึกษาที่ได้ GPA สูงสุดในคณะวิศวกรรม: $topEng"); // -> สมชาย
+
+  // 2. ทดสอบฟังก์ชันจัดกลุ่มคณะ
+  print("\n2. การจัดกลุ่มนักศึกษาตามคณะ:");
+  var resultGroup = groupByFaculty(students);
+  resultGroup.forEach((faculty, list) {
+    // แปลงก้อนข้อมูลให้เหลือแค่รายชื่อพิมพ์ออกมาดูง่ายๆ
+    var names = list.map((s) => s["name"]).toList();
+    print("คณะ$faculty: $names");
+  });
+
+  // 3. ใช้ sort() เรียงลำดับจาก GPA สูงไปต่ำ และพิมพ์ 3 อันดับแรก
+  print("\n3. นักศึกษาที่มี GPA สูงสุด 3 อันดับแรก:");
+  
+  // โคลนข้อมูลออกมาก่อนเพื่อไม่ให้สลับลำดับตัวแปรต้นฉบับ
+  var sortedList = List<Map<String, dynamic>>.from(students);
+  
+  // สั่งเรียงลำดับจากมากไปน้อย (เอา b ตั้งลบด้วย a)
+  sortedList.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  // วนลูปหยิบข้อมูลมาพิมพ์แค่ 3 ตัวแรก (0, 1, 2)
+  for (int i = 0; i < 3; i++) {
+    var s = sortedList[i];
+    print("   อันดับที่ ${i + 1}: ${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}");
+  }
+}
 ```
 ---
 
