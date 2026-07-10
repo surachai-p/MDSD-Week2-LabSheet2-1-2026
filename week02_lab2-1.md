@@ -720,6 +720,11 @@ void main() {
   }
 }
 ```
+----
+**ผลลัพธ์โจทย์ฝึก 2**
+
+<img width="1864" height="1048" alt="โจทย์ฝึก 2" src="https://github.com/user-attachments/assets/abde9fe3-954a-41f6-8bde-74b797784c2f" />
+
 ---
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
