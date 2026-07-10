@@ -344,6 +344,12 @@ void main() {
 ```
 ---
 
+**ผลลัพธ์โจทย์ฝึก 1.1**
+
+<img width="1858" height="750" alt="โจทย์ฝึก 1" src="https://github.com/user-attachments/assets/7c2c5098-9852-42c1-bb38-e4a1b0a5e531" />
+
+---
+
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
 
 ### ทฤษฎี 2.1 — รูปแบบ Function ใน Dart
