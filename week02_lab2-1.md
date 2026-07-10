@@ -1072,6 +1072,8 @@ void main() {
 
 **ขั้นตอนที่ 4** กด Run และอ่านผลลัพธ์ทุกบรรทัด
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/1d6f37c6-c1d5-4875-a695-b58e3d61aa93" />
+
 ---
 
 ### 🎯 โจทย์ฝึกทำ 3 — เขียน Class ด้วยตนเอง
