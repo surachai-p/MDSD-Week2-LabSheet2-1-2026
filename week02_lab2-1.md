@@ -210,6 +210,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 3** กด **Run** ตรวจสอบผลลัพธ์ที่ได้
+<img width="3400" height="2122" alt="image" src="https://github.com/user-attachments/assets/4a1ad83f-8c01-4806-b0bc-79ffcb01e8c8" />
+
 
 **ขั้นตอนที่ 4** เพิ่มโค้ดต่อไปนี้ **ต่อท้าย** ภายใน `main()` ก่อนปิด `}`
 
@@ -226,6 +228,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง สังเกตผลลัพธ์ที่เพิ่มขึ้น
+<img width="3398" height="1828" alt="image" src="https://github.com/user-attachments/assets/61d5a16f-b2e7-4503-831d-4fc8504a83ec" />
+
 
 **ขั้นตอนที่ 6** เพิ่มโค้ด Collections ต่อท้าย
 
@@ -253,6 +257,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="3380" height="1786" alt="image" src="https://github.com/user-attachments/assets/7c43d69f-e3c0-40d8-a393-328ab097b136" />
 
 ---
 
@@ -306,6 +311,8 @@ void main() {
 
 
 ```
+<img width="3420" height="2116" alt="image" src="https://github.com/user-attachments/assets/70fefafd-442d-4392-bfd1-257f6bb703b9" />
+
 ---
 
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
