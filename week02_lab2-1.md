@@ -520,8 +520,10 @@ void main() {
 ```
 
 **ขั้นตอนที่ 2** กด Run สังเกตผลลัพธ์
+<img width="3412" height="2112" alt="image" src="https://github.com/user-attachments/assets/847c983f-f713-4d55-8466-9b4cfb11acc1" />
 
 **ขั้นตอนที่ 3** ทดลองเปลี่ยนค่า `gpa` ในแต่ละ `printStudent()` เพื่อดูว่า Label เปลี่ยนอย่างไร
+<img width="3420" height="2012" alt="image" src="https://github.com/user-attachments/assets/b21550c7-92c8-4f23-92e2-bdbc5582be48" />
 
 ---
 
