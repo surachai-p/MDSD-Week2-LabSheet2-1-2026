@@ -507,8 +507,11 @@ void main() {
 ```
 
 **ขั้นตอนที่ 2** กด Run สังเกตผลลัพธ์
+<img width="953" height="723" alt="image" src="https://github.com/user-attachments/assets/1f17a099-8d5f-4374-9301-eeb135338edc" />
+
 
 **ขั้นตอนที่ 3** ทดลองเปลี่ยนค่า `gpa` ในแต่ละ `printStudent()` เพื่อดูว่า Label เปลี่ยนอย่างไร
+<img width="953" height="620" alt="image" src="https://github.com/user-attachments/assets/c43c7ea6-8cbd-409c-95fc-ad52defa34e2" />
 
 ---
 
@@ -566,6 +569,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 2** กด Run และอ่านผลลัพธ์ทุกส่วน
+<img width="955" height="551" alt="image" src="https://github.com/user-attachments/assets/f2658773-95fc-4bac-b1fd-90a3417f1242" />
+
 
 **ขั้นตอนที่ 3** เพิ่มโค้ดต่อท้ายใน `main()` เพื่อกรองนักศึกษาเฉพาะคณะ "วิศวกรรม" แล้วแสดงผล
 
@@ -580,6 +585,7 @@ void main() {
     print("  ${s["name"]}: ${s["gpa"]}");
   }
 ```
+<img width="942" height="707" alt="image" src="https://github.com/user-attachments/assets/d3d753f8-35de-4ee8-a541-49226a949e00" />
 
 ---
 
