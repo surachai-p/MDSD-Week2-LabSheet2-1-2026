@@ -581,6 +581,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 2** กด Run และอ่านผลลัพธ์ทุกส่วน
+<img width="3410" height="1972" alt="image" src="https://github.com/user-attachments/assets/b25ced57-9c5a-4518-b894-41fe00f43994" />
+
 
 **ขั้นตอนที่ 3** เพิ่มโค้ดต่อท้ายใน `main()` เพื่อกรองนักศึกษาเฉพาะคณะ "วิศวกรรม" แล้วแสดงผล
 
@@ -595,6 +597,7 @@ void main() {
     print("  ${s["name"]}: ${s["gpa"]}");
   }
 ```
+<img width="3412" height="2140" alt="image" src="https://github.com/user-attachments/assets/d339fc40-7d43-4e7a-96bb-e3fb7e1bebeb" />
 
 ---
 
