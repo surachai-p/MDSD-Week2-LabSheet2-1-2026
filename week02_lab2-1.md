@@ -599,10 +599,61 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// === 1. Function findTopStudentByFaculty ===
+String findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+  var facultyStudents = students.where((s) => s["faculty"] == faculty).toList();
+  var topStudent = facultyStudents.reduce((a, b) => (a["gpa"] as double) > (b["gpa"] as double) ? a : b);
+  return topStudent["name"];
+}
+
+// === 2. Function groupByFaculty ===
+Map<String, List<Map<String, dynamic>>> groupByFaculty(List<Map<String, dynamic>> students) {
+  Map<String, List<Map<String, dynamic>>> grouped = {};
+  for (var s in students) {
+    String fac = s["faculty"];
+    if (!grouped.containsKey(fac)) {
+      grouped[fac] = [];
+    }
+    grouped[fac]!.add(s);
+  }
+  return grouped;
+}
+
+void main() {
+  // ข้อมูลนักศึกษาจากการทดลอง 2.2
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // เรียกใช้งานข้อ 1
+  print("=== ค้นหานักศึกษา GPA สูงสุดตามคณะ ===");
+  String topEngineer = findTopStudentByFaculty(students, "วิศวกรรม");
+  print("นักศึกษาที่ GPA สูงสุดในคณะวิศวกรรม: $topEngineer");
+
+  // เรียกใช้งานข้อ 2
+  print("\n=== การจัดกลุ่มนักศึกษาตามคณะ ===");
+  var groups = groupByFaculty(students);
+  print(groups);
+
+  // === 3. ใช้ sort() เรียงนักศึกษาตาม GPA จากสูงไปต่ำ แล้วพิมพ์สูงสุด 3 อันดับแรก ===
+  print("\n=== นักศึกษาที่มี GPA สูงสุด 3 อันดับแรก ===");
+  students.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+  
+  for (int i = 0; i < 3; i++) {
+    var s = students[i];
+    print("${i + 1}. ${s["name"]} คณะ: ${s["faculty"]} GPA: ${s["gpa"]}");
+  }
+}
 
 
 ```
+<img width="960" height="523" alt="image" src="https://github.com/user-attachments/assets/a686d1c2-ebb9-4206-9c73-bcc5b4ef5ae1" />
+
 ---
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
