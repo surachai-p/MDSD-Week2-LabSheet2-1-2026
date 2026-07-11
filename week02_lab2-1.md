@@ -1330,6 +1330,8 @@ void main() async {
 ```
 
 **ขั้นตอนที่ 3** กด Run สังเกตความแตกต่างของเวลา
+<img width="953" height="582" alt="image" src="https://github.com/user-attachments/assets/d9dfc8af-0e4b-4541-9ff1-01b554e754f3" />
+
 
 **ขั้นตอนที่ 4** เพิ่ม Error Handling ต่อท้าย `main()`:
 
@@ -1352,10 +1354,11 @@ void main() async {
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 3236 ms
+Parallel ใช้เวลา:  993 ms
+ประหยัดเวลาได้:     2243 ms (69.31 %)
 ```
+<img width="948" height="688" alt="image" src="https://github.com/user-attachments/assets/ef8462ee-6f21-4fd9-8754-a25ea44b9473" />
 
 ---
 
@@ -1418,10 +1421,57 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+// 1. สร้าง Future<double> calculateTax ที่มี delay 0.5 วินาที และคำนวณภาษีตามอัตราก้าวหน้า
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+  if (income <= 150000) {
+    return 0.0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+// 3. สร้าง Stream<String> ที่จำลองการส่ง Chat Message ทุก 1 วินาที เป็นเวลา 5 ครั้ง
+Stream<String> chatMessageStream() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1));
+    yield "Chat Message #$i";
+  }
+}
+
+void main() async {
+  print("=== ส่วนที่ 1 & 2: คำนวณภาษีด้วย Future.wait ===");
+  // ดึงข้อมูลรายได้ของผู้ใช้ 3 คนพร้อมกันแบบ Parallel
+  var taxResults = await Future.wait([
+    calculateTax(120000), 
+    calculateTax(250000), 
+    calculateTax(600000), 
+  ]);
+
+  print("ภาษีคนที่ 1: ${taxResults[0]} บาท");
+  print("ภาษีคนที่ 2: ${taxResults[1]} บาท");
+  print("ภาษีคนที่ 3: ${taxResults[2]} บาท");
+
+  // คำนวณผลรวมภาษีทั้งหมด
+  double totalTax = taxResults.reduce((a, b) => a + b);
+  print("ผลรวมภาษีทั้งหมด: $totalTax บาท\n");
+
+  print("=== ส่วนที่ 3: รับข้อความจาก Stream ===");
+  // แสดงผล Stream ผ่าน await for
+  await for (String message in chatMessageStream()) {
+    print("ได้รับ: $message");
+  }
+}
 
 ```
+<img width="951" height="402" alt="image" src="https://github.com/user-attachments/assets/d268b72a-3d74-4b7c-8faf-a35563ea8c85" />
+
 ---
 
 
