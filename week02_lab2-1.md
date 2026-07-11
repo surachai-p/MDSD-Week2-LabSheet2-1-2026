@@ -210,6 +210,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 3** กด **Run** ตรวจสอบผลลัพธ์ที่ได้
+<img width="958" height="541" alt="image" src="https://github.com/user-attachments/assets/7102a1e2-2e31-47a9-86f4-7e6fd0b84e05" />
+
 
 **ขั้นตอนที่ 4** เพิ่มโค้ดต่อไปนี้ **ต่อท้าย** ภายใน `main()` ก่อนปิด `}`
 
@@ -226,6 +228,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง สังเกตผลลัพธ์ที่เพิ่มขึ้น
+<img width="957" height="552" alt="image" src="https://github.com/user-attachments/assets/05f5db5f-693c-4477-8b5a-2dd6a29c0049" />
+
 
 **ขั้นตอนที่ 6** เพิ่มโค้ด Collections ต่อท้าย
 
@@ -253,6 +257,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="945" height="610" alt="image" src="https://github.com/user-attachments/assets/491d2b5d-cc1b-4ef0-bb2f-a90781f713f5" />
 
 ---
 
@@ -273,10 +278,28 @@ void main() {
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// === โจทย์ฝึกทำ 1.1 ===
+  // 1. เพิ่มรายวิชา "Database" ที่มีคะแนน 88
+  courses.add("Database");
+  courseScores["Database"] = 88;
 
+  // 2. หาวิชาที่มีคะแนนสูงสุด
+  var maxEntry = courseScores.entries.reduce((a, b) => a.value > b.value ? a : b);
+  print("\nวิชาที่ได้คะแนนสูงสุด: ${maxEntry.key} (${maxEntry.value} คะแนน)");
 
+  // 3. นับจำนวนวิชาที่ได้คะแนน >= 90
+  int count90 = courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $count90 วิชา");
+
+  // 4. สร้าง Set<String> ชื่อ passedCourses (คะแนน >= 80)
+  Set<String> passedCourses = courseScores.entries
+      .where((e) => e.value >= 80)
+      .map((e) => e.key)
+      .toSet();
+  print("วิชาที่ผ่าน: $passedCourses");
 ```
+<img width="952" height="775" alt="image" src="https://github.com/user-attachments/assets/5b0ca76e-4f44-41c9-a051-b8c4127cd2ee" />
+
 ---
 
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
