@@ -1540,6 +1540,7 @@ void main() async {
 ```
 
 **ขั้นตอนที่ 3** กด Run สังเกตความแตกต่างของเวลา
+<img width="3418" height="2130" alt="image" src="https://github.com/user-attachments/assets/0f7b2bbe-8091-465b-8886-db29d059e511" />
 
 **ขั้นตอนที่ 4** เพิ่ม Error Handling ต่อท้าย `main()`:
 
@@ -1559,12 +1560,13 @@ void main() async {
 ```
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง บันทึกผลเวลาของ Sequential vs Parallel
+<img width="3420" height="2130" alt="image" src="https://github.com/user-attachments/assets/662b4ff3-9297-464e-a65e-733d7e73b845" />
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 1906 ms
+Parallel ใช้เวลา:   802 ms
+ประหยัดเวลาได้:     1104 ms ((57.92  %)
 ```
 
 ---
@@ -1613,6 +1615,7 @@ void main() async {
   print("\nสิ้นสุดการแสดงราคา");
 }
 ```
+<img width="3410" height="1996" alt="image" src="https://github.com/user-attachments/assets/6c2a1040-8ba1-49cd-885d-d4d84089b587" />
 
 **ขั้นตอนที่ 2** กด Run สังเกตว่าราคาออกมาทีละค่า ไม่ใช่ทั้งหมดพร้อมกัน
 
@@ -1628,37 +1631,186 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+// ==========================================
+// ข้อที่ 1 ฟังก์ชันคำนวณภาษีอัตราก้าวหน้า (Async)
+// ==========================================
+Future<double> calculateTax(double income) async {
+  // จำลอง delay 0.5 วินาที (500 มิลลิวินาที)
+  await Future.delayed(Duration(milliseconds: 500));
+
+  if (income <= 150000) {
+    return 0.0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+// ==========================================
+// ข้อที่ 3 Stream Generator จำลองส่ง Chat Message
+// ==========================================
+Stream<String> simulateChatMessage() async* {
+  List<String> messages = [
+    "สวัสดีครับ มีใครอยู่ไหม?",
+    "กำลังศึกษาเรื่อง Async ในภาษา Dart อยู่ครับ",
+    "Future.wait ช่วยให้ประหยัดเวลาได้เยอะเลยนะ",
+    "ส่วน Stream ก็ใช้จัดการข้อมูลที่มาเป็นช่วงๆ ได้ดีมาก",
+    "จบบทเรียนนี้แล้ว ยินดีด้วยครับ! 🎉"
+  ];
+
+  for (var msg in messages) {
+    await Future.delayed(Duration(seconds: 1)); // delay ทุก 1 วินาที
+    yield msg; // ส่งข้อความออกทาง Stream
+  }
+}
+
+
+Stream<double> simulateStockPrice(String symbol) async* {
+  double price = 100.0;
+  int ticks = 0;
+
+  while (ticks < 5) {
+    await Future.delayed(Duration(milliseconds: 500));
+    double change = (ticks % 2 == 0) ? 2.5 : -1.5;
+    price += change;
+    ticks++;
+    yield price;
+  }
+}
+
+// ==========================================
+// ฟังก์ชัน main() ควบคุมการทำงานทั้งหมด
+// ==========================================
+void main() async {
+  // === (ส่วนเดิมของอาจารย์) ===
+  print("=== ราคาหุ้น (Stream เดิม) ===");
+  print("Symbol: DART\n");
+
+  double? lastPrice;
+  await for (double price in simulateStockPrice("DART")) {
+    String direction = "";
+    if (lastPrice != null) {
+      direction = price > lastPrice! ? "📈 ขึ้น" : "📉 ลง";
+    }
+    print("ราคา: ${price.toStringAsFixed(2)} บาท  $direction");
+    lastPrice = price;
+  }
+  print("\nสิ้นสุดการแสดงราคา");
+
+
+  print("\n-------------------------------------------");
+  print("=== ผลลัพธ์การรันโจทย์ฝึกทำ 4 (เพิ่มเติม) ===");
+  print("-------------------------------------------\n");
+
+
+  // ==========================================
+  // ข้อที่ 2 ดึงข้อมูลรายได้ 3 คนพร้อมกัน (Future.wait)
+  // ==========================================
+  print("=== 1 & 2. คำนวณภาษีของนักศึกษา/ผู้ใช้ 3 คนพร้อมกัน (Parallel) ===");
+  
+  Stopwatch stopwatch = Stopwatch()..start();
+
+  // กำหนดรายได้จำลองของทั้ง 3 คน
+  double income1 = 250000;  // ภาษี 5% -> 12,500
+  double income2 = 450000;  // ภาษี 10% -> 45,000
+  double income3 = 600000;  // ภาษี 20% -> 120,000
+
+  // ใช้ Future.wait เพื่อยิงคำนวณพร้อมๆ กัน (ใช้เวลารวมแค่ประมาณ 0.5 วินาทีแทนที่จะเป็น 1.5 วินาที)
+  List<double> taxResults = await Future.wait([
+    calculateTax(income1),
+    calculateTax(income2),
+    calculateTax(income3),
+  ]);
+
+  stopwatch.stop();
+
+  // แสดงผลภาษีของแต่ละคน
+  print("คนแรก   (รายได้ ${income1.toStringAsFixed(0)} บาท) -> ภาษี: ${taxResults[0].toStringAsFixed(2)} บาท");
+  print("คนที่สอง (รายได้ ${income2.toStringAsFixed(0)} บาท) -> ภาษี: ${taxResults[1].toStringAsFixed(2)} บาท");
+  print("คนที่สาม (รายได้ ${income3.toStringAsFixed(0)} บาท) -> ภาษี: ${taxResults[2].toStringAsFixed(2)} บาท");
+
+  // คำนวณหาผลรวมภาษีทั้งหมด
+  double totalTax = taxResults.reduce((sum, current) => sum + current);
+  print("\n💰 ผลรวมภาษีทั้งหมดที่ต้องจ่าย: ${totalTax.toStringAsFixed(2)} บาท");
+  print("⏱️ ใช้เวลาในการประมวลผลไปทั้งสิ้น: ${stopwatch.elapsedMilliseconds} ms");
+
+
+  // ==========================================
+  //  ข้อที่ 3 แสดงผล แสดงข้อความแชทผ่าน await for
+  // ==========================================
+  print("\n=== 3. จำลองระบบ Chat Message (Stream) ===");
+  
+  int msgCount = 1;
+  await for (String message in simulateChatMessage()) {
+    print("[Msg $msgCount/5]: $message");
+    msgCount++;
+  }
+
+  print("\nสิ้นสุดระบบการรับส่งข้อความ Chat");
+}
 
 
 ```
+<img width="3404" height="2018" alt="image" src="https://github.com/user-attachments/assets/a894402a-7b64-4c28-b5c3-ade796417287" />
+
 ---
 
 
 ### คำถามท้ายใบงาน
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
-```text
+```
+ความแตกต่าง: * final เป็นค่าคงที่ระดับ Run-time คือจะกำหนดค่าเมื่อไหร่ก็ได้ในตอนที่โปรแกรมกำลังทำงาน แต่ถ้ากำหนดแล้วจะแก้ไขไม่ได้อีกเลย
+const เป็นค่าคงที่ระดับ Compile-time คือต้องรู้ค่าที่แน่นอนและถูกกำหนดไว้ตั้งแต่ตอนเขียนโค้ด (ก่อนโปรแกรมรัน) และค่านั้นต้องเป็นค่าคงที่ตลอดไป
+ตัวอย่างกรณีที่ใช้:
+ใช้ final: เมื่อต้องการเก็บค่าเวลาปัจจุบัน final now = DateTime.now(); หรือเก็บข้อมูลที่ดึงมาจาก API/Database เพราะเราไม่รู้ค่านั้นล่วงหน้าจนกว่าโปรแกรมจะทำงาน
+ใช้ const: เมื่อเก็บค่าคงที่ทางคณิตศาสตร์ เช่น const pi = 3.14; หรือค่ากำหนดพื้นฐานระบบ (Configuration) เช่น const primaryColor = 0xFF0000;
 
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
-```text
+```
+ความแตกต่าง:
+Positional Parameters: ส่งค่าตามลำดับตำแหน่งที่ประกาศไว้ในฟังก์ชัน (เช่น void data(String name, int age)) ตอนเรียกใช้ต้องใส่ให้ถูกลำดับ ไม่อย่างนั้นข้อมูลจะสลับกัน
+Named Parameters: ส่งค่าโดยระบุชื่อของ Parameter กำกับ (เช่น void data({required String name, int age})) โดยตอนเรียกใช้จะใส่สลับลำดับกันอย่างไรก็ได้
+การเลือกใช้:
+ควรใช้ Positional: เมื่อฟังก์ชันมีขนาดเล็ก และมี Argument เพียง 1-2 ตัว เช่น printSquare(double width, double height)
+ควรใช้ Named: เมื่อฟังก์ชันมีตัวแปรส่งเข้าจำนวนมาก (3 ตัวขึ้นไป) หรือมีตัวแปรที่เป็น Optional (ใส่หรือไม่ใส่ก็ได้) ช่วยให้โค้ดอ่านง่ายขึ้นมาก เช่น การสร้าง Widget ใน Flutter
 
 
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
-```text
+```
+ความแตกต่าง:
+Abstract Class: มีจุดประสงค์เพื่อทำ Inheritance (สืบทอดสายเลือดหลัก) เพื่อสร้างพิมพ์เขียวให้คลาสลูกกลุ่มเดียวกัน นำไป extends ต่อ (คลาสลูกสืบทอดคลาสแม่ได้เพียงคลาสเดียว)
+Mixin: มีจุดประสงค์เพื่อทำ Code Reuse (แชร์ความสามารถข้ามสายเลือด) เป็นการหยิบความสามารถเฉพาะทางไปปลั๊กอิน (with) ร่วมกับคลาสใดก็ได้ โดยไม่จำเป็นต้องอยู่ในกลุ่มเครือญาติเดียวกัน
+ตัวอย่างสถานการณ์:
+เหมาะกับ Abstract Class: ระบบเกมที่มีคลาสแม่เป็น abstract class Monster แล้วมีคลาสลูกเป็น Goblin, Dragon (สืบทอดคุณสมบัติสัตว์ประหลาดเหมือนกัน)
+เหมาะกับ Mixin: ระบบที่มีพฤติกรรมเฉพาะตัว เช่น mixin Walker (เดินได้) หรือ mixin Flyer (บินได้) ซึ่งสามารถนำ Flyer ไปใช้ได้ทั้งกับ Dragon (ที่เป็นมอนสเตอร์) และ Airplane (ที่เป็นยานพาหนะ)
 
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
-```text
+```
+เวลาที่ใช้ (อ้างอิงจากผลทดสอบก่อนหน้า): * Sequential ใช้เวลาประมาณ 1,906 ms
+Parallel ใช้เวลาประมาณ 802 ms
+เหตุผลที่ Parallel เร็วกว่า: เพราะ Parallel ใช้ Future.wait ในการสั่งให้ทุกฟังก์ชันทำงานพร้อมๆ กันในเวลาเดียวกัน (แบบขนาน) ในขณะที่ Sequential ต้องรอให้ฟังก์ชันแรกทำงานเสร็จสิ้นก่อน ถึงจะเริ่มฟังก์ชันถัดไปได้ (ทำทีละตัว)
+กรณีที่ต้องใช้ Sequential แทน: ต้องใช้เมื่องานที่สองจำเป็นต้องใช้ข้อมูลที่ได้มาจากงานแรกก่อน เช่น ต้องรอให้ระบบ Login และดึง UserID สำเร็จก่อน (งานที่ 1) ถึงจะสามารถไปดึงข้อมูลโปรไฟล์ของ User คนนั้นออกมาได้ (งานที่ 2)
 
 
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
-```text
+```
+ความแตกต่าง:
+Future: จัดการกับข้อมูลแบบ Async ที่จะส่งกลับมา "แค่ครั้งเดียว/ก้อนเดียว" (Single Value) ในอนาคต (ได้ผลลัพธ์แล้วจบการทำงาน)
+Stream: จัดการกับข้อมูลแบบ Async ที่ส่งมาเป็น "กระแสข้อมูลอย่างต่อเนื่อง" (Sequence of Values) ไหลมาเรื่อยๆ เป็นช่วงๆ ตราบใดที่ยังไม่สั่งปิด Stream
+ตัวอย่างในแอปพลิเคชันจริง:
+เหมาะกับ Future: การกดปุ่มตกลงเพื่อดึงข้อมูลสภาพอากาศ ณ ปัจจุบันจาก API, การกดโหลดรูปภาพโปรไฟล์ หรือการดึงรายชื่อสินค้าจาก Database
+เหมาะกับ Stream: ระบบห้องแชท (Chat Room) ที่ต้องรอรับข้อความใหม่ๆ จากเพื่อนตลอดเวลา, ระบบ GPS นำทางที่ต้องคอยอัปเดตพิกัดละติจูด/ลองจิจูดของผู้ใช้งานอยู่ทุกๆ วินาที หรือการแสดงราคาบิตคอยน์/ราคาหุ้นแบบ Real-time
 
 
 ```
