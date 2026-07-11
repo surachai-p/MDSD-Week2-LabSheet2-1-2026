@@ -983,6 +983,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 4** กด Run และอ่านผลลัพธ์ทุกบรรทัด
+<img width="953" height="707" alt="image" src="https://github.com/user-attachments/assets/32669d40-35d1-4c1c-91a5-8ef76336b1e6" />
+
 
 ---
 
@@ -997,10 +999,128 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// คลาสฐานเพื่อใช้สืบทอดในข้อ 1 
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+      : _balance = initial;
+
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) return false;
+    _balance += amount;
+    _history.add("+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+    return true;
+  }
+}
+
+// === 1. สร้าง CheckingAccount ===
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) return false;
+    
+    // เงื่อนไข อนุญาตให้ถอนเกินยอดได้ไม่เกิน 500 บาท (Overdraft)
+    if (_balance - amount < -500) {
+      print("❌ ถอนเงินไม่สำเร็จ เกินวงเงิน Overdraft 500 บาท");
+      return false;
+    }
+
+    _balance -= amount;
+    _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอนเงินสำเร็จ (ยอดปัจจุบัน ${_balance.toStringAsFixed(2)} บาท)");
+
+    // เงื่อนไข คิดค่าธรรมเนียม 50 บาท เมื่อ Overdraft (ยอดคงเหลือติดลบ)
+    if (_balance < 0) {
+      _balance -= 50;
+      _history.add("- ค่าธรรมเนียม Overdraft 50.00 บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+      print("⚠️ บัญชีติดลบ หักค่าธรรมเนียม Overdraft 50 บาท");
+    }
+    
+    return true;
+  }
+}
+
+// === 2. สร้าง Abstract Class Vehicle และ Subclass Car / Truck ===
+abstract class Vehicle {
+  double get fuelEfficiency; // Abstract getter (กม./ลิตร)
+
+  void refuel(double liters) {
+    print("เติมน้ำมัน $liters ลิตร");
+  }
+
+  void drive(double km) {
+    double usedLiters = km / fuelEfficiency;
+    print("ขับระยะทาง $km กม. (ใช้น้ำมันไป ${usedLiters.toStringAsFixed(2)} ลิตร)");
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // รถยนต์ประหยัดน้ำมัน 15 กม./ลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0;  // รถบรรทุกกินน้ำมัน 8 กม./ลิตร
+}
+
+// === 3. สร้าง Mixin Discountable และ Class Product ===
+mixin Discountable {
+  double applyDiscount(double price, double percent) {
+    return price - (price * percent / 100);
+  }
+}
+
+class Product with Discountable {
+  final String name;
+  double price;
+
+  Product({required this.name, required this.price});
+}
+
+void main() {
+  // ทดสอบข้อ 1
+  print("=== ทดสอบ CheckingAccount ===");
+  var checkAcc = CheckingAccount(ownerName: "สมชาย", initial: 200);
+  checkAcc.withdraw(300); // ถอนเกินไป 100 บาท (จะติดลบ 100 และโดนหักค่าปรับ 50 บาท รวมเป็น -150 บาท)
+  
+  // ทดสอบข้อ 2
+  print("\n=== ทดสอบ Vehicle ===");
+  Car car = Car();
+  print("รถยนต์ประหยัดน้ำมัน ${car.fuelEfficiency} กม./ลิตร");
+  car.drive(60);
+
+  Truck truck = Truck();
+  print("รถบรรทุกประหยัดน้ำมัน ${truck.fuelEfficiency} กม./ลิตร");
+  truck.drive(60);
+
+  // ทดสอบข้อ 3
+  print("\n=== ทดสอบ Mixin Discountable ===");
+  var prod = Product(name: "Laptop", price: 30000);
+  double finalPrice = prod.applyDiscount(prod.price, 10); // ลด 10%
+  print("สินค้า ${prod.name} ราคาปกติ ${prod.price} บาท เหลือเพียง $finalPrice บาท");
+}
 
 
 ```
+<img width="952" height="458" alt="image" src="https://github.com/user-attachments/assets/b0869f05-7b07-4fd5-815d-e1d9270f1b4a" />
+
 ---
 
 ## ส่วนที่ 4 — ทฤษฎีและการทดลอง: Async/Await และ Future
