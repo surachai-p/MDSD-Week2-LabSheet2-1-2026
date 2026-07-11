@@ -273,7 +273,36 @@ void main() {
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+ print("\n=== รายวิชาที่ลงทะเบียน ===");
+  List<String> courses = ["Mobile Dev", "Web Dev", "AI","Database"];
+  Map<String, int> courseScores = {
+    "Mobile Dev": 90,
+    "Web Dev": 85,
+    "AI": 92,
+    "Database":88,
+  };
+
+  // วนซ้ำแสดงรายวิชาและคะแนน
+  for (int i = 0; i < courses.length; i++) {
+    String course = courses[i];
+    int? score = courseScores[course];
+    print("${i + 1}. $course: ${score ?? 'ยังไม่มีคะแนน'} คะแนน");
+  }
+
+  // คำนวณเฉลี่ย
+  int total = courseScores.values.reduce((a, b) => a + b);
+  
+  double avg = total / courseScores.length;
+  print("คะแนนเฉลี่ย: ${avg.toStringAsFixed(2)}");
+  var max = courseScores.entries.reduce((a, b) => b.value > a.value ? b : a);
+  print("วิชาที่ได้คะแนนสูงสุด: ${max.key} (${max.value} คะแนน)");
+
+  int count = courseScores.values.where((s) => s >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $count วิชา");
+
+  Set<String> passedCourses = courseScores.entries.where((e) => e.value >= 80).map((e) => e.key).toSet();
+  print("วิชาที่ผ่าน: $passedCourses");
+}
 
 
 ```
