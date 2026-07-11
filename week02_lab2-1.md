@@ -611,10 +611,115 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === (โค้ดเดิมของคุณ) ===
+  print("=== นักศึกษาที่ GPA >= 3.0 ===");
+  var honorStudents = students.where((s) => (s["gpa"] as double) >= 3.0).toList();
+  for (var s in honorStudents) { print("  ${s["name"]}: ${s["gpa"]}"); }
+
+  print("\n=== รายงานนักศึกษา ===");
+  var report = students.map((s) => "${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}").toList();
+  report.forEach(print);
+
+  print("\n=== วิเคราะห์คะแนน ===");
+  List<double> gpas = students.map((s) => s["gpa"] as double).toList();
+  double maxGpa = gpas.reduce((a, b) => a > b ? a : b);
+  double minGpa = gpas.reduce((a, b) => a < b ? a : b);
+  double avgGpa = gpas.reduce((a, b) => a + b) / gpas.length;
+  print("GPA สูงสุด: $maxGpa");
+  print("GPA ต่ำสุด: $minGpa");
+  print("GPA เฉลี่ย: ${avgGpa.toStringAsFixed(2)}");
+
+  bool anyFailing = students.any((s) => (s["gpa"] as double) < 2.0);
+  bool allPassing = students.every((s) => (s["gpa"] as double) >= 2.0);
+  print("มีนักศึกษาที่ GPA < 2.0: $anyFailing");
+  print("ทุกคน GPA >= 2.0: $allPassing");
+
+  print("\n=== นักศึกษาคณะวิศวกรรม ===");
+  var engineeringStudents = students.where((s) => s["faculty"] == "วิศวกรรม").toList();
+  for (var s in engineeringStudents) { print("  ${s["name"]}: ${s["gpa"]}"); }
+  // ========================
+
+  // 1. ทดสอบ Function findTopStudentByFaculty
+  print("\n=== นักศึกษาที่มี GPA สูงสุดในคณะ ===");
+  String searchFaculty = "วิทยาศาสตร์";
+  var topStudent = findTopStudentByFaculty(students, searchFaculty);
+  if (topStudent != null) {
+    print("คณะ$searchFaculty ที่ได้ GPA สูงสุดคือ: ${topStudent["name"]} (GPA: ${topStudent["gpa"]})");
+  } else {
+    print("ไม่พบนักศึกษาในคณะ$searchFaculty");
+  }
+
+  // 2. ทดสอบ Function groupByFaculty
+  print("\n=== จัดกลุ่มนักศึกษาตามคณะ ===");
+  Map<String, List<Map<String, dynamic>>> grouped = groupByFaculty(students);
+  grouped.forEach((faculty, list) {
+    print("คณะ $faculty:");
+    for (var s in list) {
+      print("  - ${s["name"]} (GPA: ${s["gpa"]})");
+    }
+  });
+
+  // 3. ใช้ sort() เรียงลำดับ GPA จากสูงไปต่ำ แล้วพิมพ์ Top 3
+  print("\n=== นักศึกษาที่มี GPA สูงสุด 3 อันดับแรก ===");
+  // ทำการ clone list ออกมาเพื่อไม่ให้กระทบกับข้อมูลเดิมตอนแรก
+  List<Map<String, dynamic>> sortedStudents = List.from(students); 
+  
+  // sort จากสูงไปต่ำ: ถ้า b มากกว่า a ให้สลับขึ้นมาก่อน
+  sortedStudents.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  // ดึง 3 อันดับแรก (ใช้ take(3))
+  var top3 = sortedStudents.take(3);
+  int rank = 1;
+  for (var s in top3) {
+    print("อันดับที่ $rank: ${s["name"]} คณะ: ${s["faculty"]} (GPA: ${s["gpa"]})");
+    rank++;
+  }
+}
+
+// ฟังก์ชันหาคนที่ GPA สูงสุดในคณะที่ระบุ
+Map<String, dynamic>? findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+  // กรองเฉพาะคณะที่ต้องการ
+  var facultyStudents = students.where((s) => s["faculty"] == faculty).toList();
+  
+  if (facultyStudents.isEmpty) return null;
+
+  // ใช้ reduce เปรียบเทียบหาคนที่มี GPA สูงสุด
+  return facultyStudents.reduce((a, b) => (a["gpa"] as double) > (b["gpa"] as double) ? a : b);
+}
+
+// ฟังก์ชันจัดกลุ่มนักศึกษาตามคณะ
+Map<String, List<Map<String, dynamic>>> groupByFaculty(List<Map<String, dynamic>> students) {
+  Map<String, List<Map<String, dynamic>>> resultMap = {};
+
+  for (var student in students) {
+    String faculty = student["faculty"];
+    
+    // ถ้ายังไม่มี Key คณะนี้ใน Map ให้สร้าง List ว่างรอก่อน
+    if (!resultMap.containsKey(faculty)) {
+      resultMap[faculty] = [];
+    }
+    
+    // เพิ่มข้อมูลนักศึกษาเข้าไปในคณะนั้นๆ
+    resultMap[faculty]!.add(student);
+  }
+
+  return resultMap;
+}
 
 
 ```
+<img width="3402" height="2140" alt="image" src="https://github.com/user-attachments/assets/004e38e9-2888-4a5c-8c80-aefdbc73237e" />
+
 ---
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
