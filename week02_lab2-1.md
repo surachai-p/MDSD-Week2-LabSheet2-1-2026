@@ -272,9 +272,10 @@ void main() {
 วิชาที่ผ่าน: {Mobile Dev, Web Dev, AI, Database}
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
+
 ```dart
 // บันทึกโค้ดในส่วนนี้
-
 
 ```
 ---
@@ -1229,27 +1230,81 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
-
+StatelessWidget คือ Widget ที่ไม่มีข้อมูลภายในที่เปลี่ยนแปลงได้ — ค่าทั้งหมดถูกกำหนดผ่าน
+Constructor ตอนสร้าง และ build() จะถูกเรียกเพียงครั้งเดียว (หรือเมื่อ Widget แม่สร้างมันขึ้นใหม่
+ด้วยค่าที่ต่างไป) เหมาะกับ UI ที่หน้าตาคงที่ตามค่าที่รับมา เช่น การ์ดแสดงข้อมูลนักศึกษา
+StatefulWidget แยกออกเป็น 2 Class คือตัว Widget เอง (config เริ่มต้น ไม่เปลี่ยนแปลง) กับ
+State<T> ซึ่งเก็บข้อมูลที่เปลี่ยนแปลงได้ตลอดอายุของ Widget (เช่น ตัวนับ, ค่าใน TextField)
+setState() จำเป็นเพราะ Flutter ไม่ได้ "จับตาดู" ตัวแปรใน State โดยอัตโนมัติ — มันไม่รู้ว่าเมื่อไหร่
+ค่าจะเปลี่ยน การเรียก setState(() {...}) คือการบอก Flutter อย่างชัดเจนว่า "ข้อมูลเปลี่ยนแล้ว
+กรุณาเรียก build() ใหม่เพื่อวาดหน้าจอให้ตรงกับข้อมูลล่าสุด"
+ถ้าแก้ค่าตัวแปรโดยไม่เรียก setState() ตัวแปรจะเปลี่ยนค่าจริงในหน่วยความจำ (ถ้าไปพิมพ์ด้วย print()
+จะเห็นค่าใหม่) แต่ Flutter จะไม่รู้ว่าต้อง build() ใหม่ ทำให้หน้าจอยังคงแสดงค่าเดิมค้างอยู่
+จนกว่าจะมีเหตุการณ์อื่นที่ทำให้ build() ถูกเรียกใหม่ (เช่น หมุนจอ หรือ Widget แม่ build ใหม่)
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
-
+Column และ Row เป็น Widget ที่ Layout ลูกทุกตัวพร้อมกันในครั้งเดียว (Eager Rendering) —
+ไม่ว่าจะมีลูก 5 ตัวหรือ 5,000 ตัว Flutter จะสร้าง (build) Widget ลูกทั้งหมดทันที และถ้าจำนวน
+ลูกมากเกินพื้นที่หน้าจอ จะเกิด Overflow (เห็นแถบเหลือง-ดำ พร้อม RenderFlex overflowed)
+เว้นแต่จะห่อด้วย SingleChildScrollView ซึ่งก็ยังคง build ทุกตัวเหมือนเดิม เพียงแค่เลื่อนดูได้
+ListView.builder ใช้เทคนิค Lazy Rendering — มันจะเรียก itemBuilder เฉพาะรายการที่ "มองเห็น
+บนจอ" (บวกกันชนเล็กน้อยเพื่อความลื่นไหล) เท่านั้น เมื่อเลื่อนออกจากจอ Widget เดิมจะถูกทิ้งและ
+สร้างใหม่เมื่อเลื่อนกลับมา ทำให้ประหยัดหน่วยความจำและเวลาในการ build มาก
+ควรใช้ Column/Row เมื่อจำนวนลูกคงที่และน้อย รู้แน่ชัดว่ามีกี่ตัว (เช่น การ์ดข้อมูล 1 ใบ, ฟอร์ม
+ที่มีช่องกรอกไม่กี่ช่อง) ส่วน ListView.builder ควรใช้เมื่อแสดงรายการที่มีจำนวนมากหรือไม่แน่นอน
+(เช่น รายชื่อนักศึกษาทั้งชั้น, ฟีดข่าว, ประวัติแชท) โดยเฉพาะถ้าข้อมูลมาจาก API หรือฐานข้อมูล
 
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
-
+build() ต้องคืนค่าเป็น Widget แบบทันที (Synchronous) เพราะ Flutter Framework เรียก build()
+ระหว่างขั้นตอนการวาดเฟรมของหน้าจอ (Render Frame) ซึ่งต้องเสร็จภายในเวลาสั้นมาก (ประมาณ 16ms
+ต่อเฟรมเพื่อให้ได้ 60fps) ถ้า build() เป็น async และมี await ข้างใน จะทำให้ Flutter ไม่สามารถรู้ได้
+ว่าจะได้ Widget กลับมาเมื่อไหร่ ทำให้ไม่สามารถวาดเฟรมได้ตรงเวลา และ build() มีการเรียกซ้ำบ่อยมาก
+(ทุกครั้งที่ setState()) หากยิง Future ใหม่ทุกครั้งจะเป็นปัญหาการจัดการ state ที่ยุ่งเหยิงมาก
+FutureBuilder แก้ปัญหานี้โดยการรับ Future ที่สร้างไว้ล่วงหน้า (ไม่ await ตรงๆ) แล้ว "subscribe"
+ฟังการเปลี่ยนแปลงสถานะของ Future นั้นแทน ภายในมันเป็น StatefulWidget ที่เรียก setState()
+ให้เราโดยอัตโนมัติทุกครั้งที่ Future เปลี่ยนสถานะ ทำให้ build() ของเรายังคง Synchronous
+อยู่เสมอ แต่ UI ยังอัปเดตตามผลของ Future ได้
+ความหมายของ snapshot.connectionState:
+- ConnectionState.none    → ยังไม่มี Future ผูกอยู่ (future เป็น null)
+- ConnectionState.waiting → Future กำลังทำงานอยู่ ยังไม่เสร็จ (ควรแสดง Loading)
+- ConnectionState.active  → มีข้อมูลมาแล้วอย่างน้อย 1 ค่า (ใช้กับ Stream เป็นหลัก)
+- ConnectionState.done    → Future เสร็จสมบูรณ์แล้ว (ตรวจ hasError / hasData ต่อเพื่อดูผล)
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
-
+StatelessWidget และ State<T> (รวมถึง StatefulWidget) แท้จริงแล้วคือ Abstract Class ที่ Flutter
+Framework เขียนไว้ให้แล้ว เมื่อเราเขียน "class Greeting extends StatelessWidget" เรากำลังทำ
+Inheritance แบบเดียวกับที่ทำใน Shape → Circle ในใบงาน 2-1 ทุกประการ
+build() เป็น Abstract Method ใน StatelessWidget (และใน State<T>) เปรียบเทียบได้กับ
+"double get area" ใน abstract class Shape — Flutter กำหนดไว้เป็น "สัญญา" ว่า Subclass ทุกตัว
+ต้อง Override และ Implement ให้ได้ ถ้าไม่ Implement จะเจอ Error แบบเดียวกับที่ระบุใน
+ตาราง "ข้อผิดพลาดที่พบบ่อย" ของใบงาน 2-1 คือ "Non-abstract class '...' missing concrete
+implementation" เพราะ StatelessWidget/State ไม่รู้ล่วงหน้าว่า Subclass แต่ละตัวจะมีหน้าตา UI
+เป็นอย่างไร จึงบังคับให้ Subclass เป็นผู้กำหนดเอง เหมือนที่ Shape ไม่รู้ว่า Circle หรือ Rectangle
+จะคำนวณพื้นที่อย่างไร
+ส่วน State<T> ยังมี Concrete Method ที่มีให้แล้วและ Override ได้ตามต้องการ (Optional) เช่น
+initState() และ dispose() ซึ่งเทียบได้กับ Concrete Method อย่าง describe() ใน Shape ที่
+Subclass ใช้ได้เลยโดยไม่ต้อง Override หรือจะ Override เพิ่มพฤติกรรมก็ได้
 
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
-
+ควรใช้ StreamBuilder แทน FutureBuilder เพราะ Future ให้ค่าได้เพียง "ครั้งเดียว" (Resolve แล้วจบ)
+ในขณะที่ Stream ส่งค่าออกมาได้ "หลายครั้งต่อเนื่อง" ตามเวลา เช่น ราคาหุ้นที่อัปเดตทุก 500ms
+ในการทดลอง 4.2 ของใบงาน 2-1 (yield price ในลูป while)
+StreamBuilder ทำงานคล้าย FutureBuilder แต่รับ Parameter เป็น "stream:" แทน "future:" และ
+builder จะถูกเรียกใหม่ทุกครั้งที่ Stream มีการ yield ค่าใหม่ออกมา (ไม่ใช่แค่ครั้งเดียวตอนจบเหมือน
+Future) โดย snapshot.connectionState จะเป็น ConnectionState.active ระหว่างที่ Stream
+ยังคงส่งข้อมูลอยู่เรื่อยๆ และเปลี่ยนเป็น ConnectionState.done เมื่อ Stream ปิดตัวเอง (เช่น
+เมื่อลูป while ใน countDown()/simulateStockPrice() ทำงานครบ)
+ตัวอย่างการใช้งานจริงใน Mobile App: ราคาหุ้น Real-time, ข้อความแชทที่เข้ามาเรื่อยๆ, ตำแหน่ง
+GPS ที่อัปเดตขณะเคลื่อนที่, หรือสถานะการเชื่อมต่อ (Connectivity) — ทั้งหมดนี้เหมาะกับ Stream
+มากกว่า Future เพราะข้อมูลไม่ได้มาครั้งเดียวจบ แต่ไหลเข้ามาต่อเนื่องตลอดเวลาที่แอปทำงานอยู่
 
 ```
 ---
