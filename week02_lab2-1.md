@@ -1079,9 +1079,113 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+class BankAccount {
+  final String ownerName;
+  double _balance;
 
+  BankAccount({required this.ownerName, double initial = 0}) : _balance = initial;
 
+  double get balance => _balance;
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    return true;
+  }
+}
+
+// ข้อ 1: CheckingAccount// 
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) return false;
+    
+    // ถอนปกติ
+    if (_balance >= amount) {
+      _balance -= amount;
+      return true;
+    }
+    
+    // ถอนเกินยอด (Overdraft) ไม่เกิน 500 บาท
+    if (_balance - amount >= -500) {
+      _balance -= amount;
+      _balance -= 50; // หักค่าธรรมเนียม 50
+      return true;
+    }
+    
+    return false; // ถอนไม่ได้เพราะเกินวงเงิน
+  }
+}
+
+// ข้อ 2: Abstract Class Vehicle// 
+abstract class Vehicle {
+  double _fuel = 0; // ทำเป็น Private ตามสไตล์อาจารย์
+  
+  double get fuelEfficiency; // Abstract getter
+  double get fuel => _fuel;  // Getter อ่านค่าน้ำมัน
+
+  void refuel(double liters) {
+    if (liters > 0) _fuel += liters;
+  }
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (_fuel >= fuelNeeded) {
+      _fuel -= fuelNeeded;
+      print("ขับไป $km กม. สำเร็จ");
+    } else {
+      print("น้ำมันไม่พอ!");
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0;
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0;
+}
+
+// ข้อ 3: Mixin Discountable และ Product// 
+mixin Discountable {
+  // สไตล์อาจารย์ Mixin ควรกำหนดเป็นโครงสร้างให้ Class ลูกไปทำต่อ
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    price -= price * (percent / 100);
+  }
+}
+
+class Product with Discountable {
+  String name;
+  @override
+  double price; // คลาสที่เอา Mixin ไปใช้ ต้องสร้างตัวแปร price เอง
+
+  Product(this.name, this.price);
+}
+
+// ฟังก์ชันทดสอบ// 
+void main() {
+  var acc = CheckingAccount(ownerName: "สมชาย", initial: 100);
+  acc.withdraw(200);
+  print("ข้อ 1 ยอดเงินคงเหลือ: ${acc.balance}"); // ควรได้ -150
+
+  var car = Car();
+  car.refuel(10);
+  car.drive(30);
+  print("ข้อ 2 น้ำมันรถยนต์เหลือ: ${car.fuel}"); // ควรเหลือ 8.0
+
+  var shirt = Product("เสื้อ", 500);
+  shirt.applyDiscount(20);
+  print("ข้อ 3 ราคาสินค้า: ${shirt.price}"); // ควรเหลือ 400.0
+}
 ```
 ---
 
@@ -1314,9 +1418,9 @@ void main() async {
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 3621 ms
+Parallel ใช้เวลา:   997 ms
+ประหยัดเวลาได้:     2624 ms (2.6 วินาที %)
 ```
 
 ---
@@ -1380,9 +1484,81 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+// 1. //
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500)); // หน่วงเวลา 0.5 วินาที
+  
+  double tax = 0;
+  if (income <= 150000) {
+    tax = 0;
+  } else if (income <= 300000) {
+    tax = (income - 150000) * 0.05;
+  } else if (income <= 500000) {
+    tax = (150000 * 0.05) + ((income - 300000) * 0.10);
+  } else {
+    tax = (150000 * 0.05) + (200000 * 0.10) + ((income - 500000) * 0.20);
+  }
+  return tax;
+}
 
+// จำลองการดึงข้อมูลรายได้จากระบบ เพื่อให้ใช้ Future.wait ได้ตามโจทย์
+Future<double> fetchUserIncome(int userId, double amount) async {
+  await Future.delayed(Duration(milliseconds: 800)); 
+  return amount;
+}
+
+// 2. //
+Stream<String> simulateChat() async* {
+  List<String> messages = [
+    "สวัสดี! อยู่ไหม?",
+    "วันนี้กินข้าวหรือยัง?",
+    "เราเขียนแอปเสร็จแล้วนะ!",
+    "เก่งมากเลย 🎉",
+    "เจอกันพรุ่งนี้ บ๊ายบาย 👋"
+  ];
+
+  for (String msg in messages) {
+    await Future.delayed(Duration(seconds: 1)); // หน่วงเวลา 1 วินาทีต่อข้อความ
+    yield msg; // ส่งข้อความออกไปทีละบรรทัด
+  }
+}
+
+void main() async {
+  // --- ส่วนที่ 1: การใช้ Future.wait และ คำนวณภาษี ---
+  print("=== ส่วนที่ 1: คำนวณภาษีรายได้ ===");
+  
+  // ใช้ Future.wait ดึงข้อมูลรายได้ 3 คนพร้อมกัน
+  var incomes = await Future.wait([
+    fetchUserIncome(1, 120000), // ไม่เกิน 1.5 แสน (ภาษี 0)
+    fetchUserIncome(2, 450000), // อยู่ในเกณฑ์ 10%
+    fetchUserIncome(3, 750000), // อยู่ในเกณฑ์ 20%
+  ]);
+
+  double totalTax = 0;
+  
+  // คำนวณภาษีทีละคน
+  for (int i = 0; i < incomes.length; i++) {
+    double income = incomes[i];
+    double tax = await calculateTax(income);
+    totalTax += tax;
+    
+    print("ผู้ใช้ที่ ${i + 1} รายได้: ${income.toStringAsFixed(2)} บาท -> เสียภาษี: ${tax.toStringAsFixed(2)} บาท");
+  }
+  
+  print("💰 รวมภาษีที่จัดเก็บได้ทั้งหมด: ${totalTax.toStringAsFixed(2)} บาท\n");
+
+  // --- ส่วนที่ 2: การแสดงผล Stream แบบ Real-time ---
+  print("=== ส่วนที่ 2: จำลองแชท ===");
+  
+  // ใช้ await for ในการรอรับข้อมูลที่ทยอยส่งมาจาก Stream
+  await for (String message in simulateChat()) {
+    print("💬 แชทใหม่: $message");
+  }
+  
+  print("--- จบการสนทนา ---");
+}
 ```
 ---
 
@@ -1391,28 +1567,35 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
-
-
+const รู้ค่าตั้งแต่ตอนเขียน ค่าคงที่
+final รู้ค่าตอนโปรแกรมทำงาน ค่าจะต้องกำหนดตอนที่โค้ดรันถึงโค้ดบรรทัดนั่นพอใส่ค่าแล้วถึงขะห้ามเปลี่ยน
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
-
-
+Positional ต้องส่งค่าเรียงตามลำดับเป๊ะๆ สลับที่ไม่ได้ ไม่มีชื่อกำกับ
+  ใช้เมื่อฟังก์ชันมีพารามิเตอร์น้อย (1-2 ตัว) และความหมายชัดเจนอยู่แล้ว
+Named ต้องระบุชื่อตัวแปรตอนส่งค่า ทำให้สลับตำแหน่งกันได้ และมักใช้ทำค่าเริ่มต้น
+  ใช้เมื่อฟังก์ชันรับค่าหลายตัว (3 ตัวขึ้นไป) หรือบางค่าไม่จำเป็นต้องส่ง (Optional) เวลาคนอื่นมาอ่านโค้ดจะได้รู้ทันทีว่าค่านี้คืออะไร
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
-
-
+Abstract Class เป็นพิมพ์เขียว ที่บังคับว่าคลาสลูก ต้องมีลักษณะหน้าตาแบบไหน การสืบทอดทำได้แค่ 1 คลาสเท่านั้น
+Mixin ไม่ใช่การสืบทอด แต่เป็นการแพคโค้ดความสามารถบางอย่างไว้ เพื่อเอาไปแปะ ให้กับคลาสไหนก็ได้ และแปะได้ทีละหลายๆ อันด้วย
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
+Sequential (ทำงานทีละอย่าง): ใช้เวลาประมาณ 3,621 ms
+Parallel (ทำงานพร้อมกัน): ใช้เวลาประมาณ 997 ms
 
+การใช้ Future.wait (Parallel) เหมือนเราสั่งพนักงาน 3 คนให้ออกไปดึงข้อมูล User, Posts และ Followers พร้อมๆ กัน เวลาที่เสียไปจึงเท่ากับคนที่ใช้เวลานานที่สุด (แค่คนเดียว) ในขณะที่แบบ Sequential คือใช้คนเดียวทำ 3 อย่าง ต้องรอให้งานแรกเสร็จก่อนถึงเริ่มงานต่อไปได้ เวลาเลยถูกบวกทบกันไปเรื่อยๆ
 
+กรณีที่ต้องใช้ Sequential แทน:
+เมื่อ "งานที่สอง ต้องรอผลลัพธ์จากงานแรก" ครับ เช่น คุณต้องล็อกอินให้ผ่านก่อน (ได้ Token มา) แล้วค่อยเอา Token นั้นไปดึงข้อมูลโปรไฟล์ แบบนี้ทำพร้อมกันไม่ได้ ต้องรอตามลำดับเท่านั้น
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
-
-
+Future (มาครั้งเดียวจบ) เหมือนการสั่งอาหารผ่าน Grab รอพักนึง พออาหารมาส่งปุ๊บก็จบ
+Stream (มาเรื่อยๆ) เหมือนการเปิดน้ำก๊อก ทยอยมาจนกว่าเราจะกดปิด 
 ```
 ---
 
