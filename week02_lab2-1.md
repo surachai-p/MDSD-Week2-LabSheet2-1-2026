@@ -1091,7 +1091,234 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// ==========================================
+// บล็อกที่ 1: คลาสเกี่ยวกับระบบธนาคาร (Banking System)
+// ==========================================
+
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+      : _balance = initial;
+
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    _balance += amount;
+    _history.add("+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ฝาก ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    if (amount > _balance) {
+      print("❌ ยอดเงินไม่เพียงพอ (มี ${_balance.toStringAsFixed(2)} บาท)");
+      return false;
+    }
+    _balance -= amount;
+    _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอน ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n=== สรุปบัญชี: $ownerName ===");
+    print("ยอดปัจจุบัน: ${_balance.toStringAsFixed(2)} บาท");
+    print("ประวัติรายการ:");
+    if (_history.isEmpty) {
+      print("  (ยังไม่มีรายการ)");
+    } else {
+      _history.forEach((h) => print("  $h"));
+    }
+  }
+
+  @override
+  String toString() => "BankAccount($ownerName, ยอด: ${_balance.toStringAsFixed(2)})";
+}
+
+class SavingsAccount extends BankAccount {
+  final double interestRate; // อัตราดอกเบี้ยต่อปี เช่น 0.03 = 3%
+
+  SavingsAccount({
+    required String ownerName,
+    required this.interestRate,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (_balance - amount < 500) {
+      print("❌ บัญชีออมทรัพย์ต้องมียอดขั้นต่ำ 500 บาท");
+      return false;
+    }
+    return super.withdraw(amount);
+  }
+
+  void applyMonthlyInterest() {
+    double interest = _balance * interestRate / 12;
+    _balance += interest;
+    _history.add("+ ดอกเบี้ยรายเดือน ${interest.toStringAsFixed(2)} บาท");
+    print("✅ ดอกเบี้ยเดือนนี้: ${interest.toStringAsFixed(2)} บาท");
+  }
+}
+
+// [โจทย์ข้อที่ 1] สร้าง CheckingAccount ที่ถอนเกินบัญชี (Overdraft) ได้ไม่เกิน 500 บาท และคิดค่าธรรมเนียม 50 บาท
+class CheckingAccount extends BankAccount {
+  CheckingAccount({
+    required String ownerName,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+    // ถอนปกติ (ยอดเงินในบัญชีเพียงพอ)
+    if (_balance >= amount) {
+      return super.withdraw(amount);
+    }
+
+    // กรณีถอนเกินบัญชี (Overdraft) ยอดถอนรวมค่าธรรมเนียมต้องไม่ทำให้ยอดเงินติดลบเกิน -500 บาท
+    double totalDeduction = amount + 50; // หักเงิน + ค่าธรรมเนียม 50 บาท
+    if (_balance - totalDeduction < -500) {
+      print("❌ ไม่สามารถดำเนินการได้ เนื่องจากเกินวงเงิน Overdraft 500 บาท (ยอดปัจจุบัน: ${_balance.toStringAsFixed(2)} บาท, ต้องการถอน: ${amount.toStringAsFixed(2)} บาท + ค่าธรรมเนียม 50.00 บาท)");
+      return false;
+    }
+
+    _balance -= totalDeduction;
+    _history.add("- ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท (ค่าธรรมเนียม Overdraft: 50.00 บาท, ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอนเงินเกินบัญชี (Overdraft) ${amount.toStringAsFixed(2)} บาท สำเร็จ (คิดค่าธรรมเนียม Overdraft 50 บาท)");
+    return true;
+  }
+}
+
+// ==========================================
+// บล็อกที่ 2: ระบบยานพาหนะ (Vehicle Abstract Class)
+// ==========================================
+
+// [โจทย์ข้อที่ 2] สร้าง Abstract Class Vehicle และคลาสลูก Car, Truck
+abstract class Vehicle {
+  double _fuel = 0;
+  double get fuel => _fuel;
+
+  // Abstract getter สำหรับอัตราสิ้นเปลืองน้ำมัน (กม./ลิตร)
+  double get fuelEfficiency;
+
+  void refuel(double liters) {
+    if (liters <= 0) {
+      print("❌ เติมน้ำมันต้องมากกว่า 0 ลิตร");
+      return;
+    }
+    _fuel += liters;
+    print("⛽ เเติมน้ำมัน +${liters.toStringAsFixed(2)} ลิตร (น้ำมันสะสมในถัง: ${_fuel.toStringAsFixed(2)} ลิตร)");
+  }
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (fuelNeeded > _fuel) {
+      print("❌ น้ำมันไม่พอสำหรับการเดินทาง $km กม. (ต้องใช้น้ำมัน: ${fuelNeeded.toStringAsFixed(2)} ลิตร, มีอยู่เพียง: ${_fuel.toStringAsFixed(2)} ลิตร)");
+      return;
+    }
+    _fuel -= fuelNeeded;
+    print("🚗 เดินทางได้ระยะทาง $km กม. (ใช้น้ำมันไป: ${fuelNeeded.toStringAsFixed(2)} ลิตร, น้ำมันคงเหลือ: ${_fuel.toStringAsFixed(2)} ลิตร)");
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // รถยนต์ทั่วไปวิ่งได้ 15 กม./ลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0; // รถบรรทุกวิ่งได้ 8 กม./ลิตร (กินน้ำมันมากกว่า)
+}
+
+// ==========================================
+// บล็อกที่ 3: ระบบสินค้าและส่วนลด (Mixin Discountable)
+// ==========================================
+
+// [โจทย์ข้อที่ 3] สร้าง Mixin Discountable และ Class Product
+mixin Discountable {
+  // สัญญากับคลาสที่จะนำไปใช้ว่าต้องมีคุณสมบัติเหล่านี้เพื่อนำมาใช้คำนวณราคา
+  String get name;
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    if (percent < 0 || percent > 100) {
+      print("❌ เปอร์เซ็นต์ส่วนลดต้องอยู่ระหว่าง 0 ถึง 100");
+      return;
+    }
+    double discountAmount = price * (percent / 100);
+    price -= discountAmount;
+    print("🏷️ ใช้โค้ดลดราคา $percent% สำหรับ $name (ประหยัดไป: ${discountAmount.toStringAsFixed(2)} บาท) -> ราคาใหม่เหลือ: ${price.toStringAsFixed(2)} บาท");
+  }
+}
+
+class Product with Discountable {
+  @override
+  final String name;
+  @override
+  double price;
+
+  Product({required this.name, required this.price});
+}
+
+// ==========================================
+// ฟังก์ชันหลักสำหรับการรันและทดสอบระบบทั้งหมด
+// ==========================================
+
+void main() {
+  // ------------------------------------------
+  // ทดสอบระบบธนาคาร
+  // ------------------------------------------
+  print("=== [ทดสอบระบบธนาคาร] ===");
+  var checking = CheckingAccount(ownerName: "สมปอง", initial: 300);
+  
+  checking.deposit(200); // ยอดปัจจุบัน = 500 บาท
+  checking.withdraw(800); // เกินยอดมา 300 บาท (ยังไม่เกินโควตาติดลบ 500) -> ผ่าน (ยอดติดลบรวมค่าธรรมเนียม = -350 บาท)
+  checking.withdraw(150); // พยายามถอนอีก 150 + ค่าธรรมเนียม 50 = 200 ยอดรวมจะติดลบ -550 -> เกินวงเงิน Overdraft -> ปฏิเสธ
+  checking.printStatement();
+
+  // ------------------------------------------
+  // ทดสอบระบบยานพาหนะ
+  // ------------------------------------------
+  print("\n=== [ทดสอบระบบยานพาหนะ] ===");
+  
+  print("\n--- ทดสอบคลาส Car (15 กม./ลิตร) ---");
+  var myCar = Car();
+  myCar.refuel(10); // เติมน้ำมัน 10 ลิตร
+  myCar.drive(120); // ขับ 120 กม. (ใช้น้ำมัน 8 ลิตร)
+  myCar.drive(50);  // พยายามขับอีก 50 กม. (น้ำมันเหลือไม่พอ)
+
+  print("\n--- ทดสอบคลาส Truck (8 กม./ลิตร) ---");
+  var myTruck = Truck();
+  myTruck.refuel(20); // เติมน้ำมัน 20 ลิตร
+  myTruck.drive(120); // ขับ 120 กม. (ใช้น้ำมัน 15 ลิตร)
+
+  // ------------------------------------------
+  // ทดสอบ Mixin ส่วนลดสินค้า
+  // ------------------------------------------
+  print("\n=== [ทดสอบระบบส่วนลด (Mixin)] ===");
+  var keyboard = Product(name: "คีย์บอร์ดไร้สาย", price: 1500);
+  print("สินค้า: ${keyboard.name}, ราคาเดิม: ${keyboard.price.toStringAsFixed(2)} บาท");
+  keyboard.applyDiscount(15); // ลดราคา 15%
+}
 
 
 ```
