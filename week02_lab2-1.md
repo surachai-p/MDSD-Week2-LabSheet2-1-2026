@@ -227,6 +227,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 5** กด Run อีกครั้ง สังเกตผลลัพธ์ที่เพิ่มขึ้น
+<img width="1917" height="1010" alt="image" src="https://github.com/user-attachments/assets/82221af8-ae7f-4770-96db-eb6f0a1bc66c" />
 
 **ขั้นตอนที่ 6** เพิ่มโค้ด Collections ต่อท้าย
 
@@ -254,6 +255,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="1917" height="1013" alt="image" src="https://github.com/user-attachments/assets/19b30403-7f9d-4772-b146-bddbb146cc79" />
 
 ---
 
