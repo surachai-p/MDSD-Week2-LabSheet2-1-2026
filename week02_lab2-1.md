@@ -277,6 +277,74 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+void main() {
+  // === บล็อกที่ 1: ชนิดข้อมูลพื้นฐาน ===
+  String studentName = "สมชาย ดีใจ";
+  int studentAge = 20;
+  double gpa = 3.75;
+  bool isEnrolled = true;
+  print("=== ข้อมูลนักศึกษา ===");
+  print("ชื่อ: $studentName");
+  print("อายุ: $studentAge ปี");
+  print("GPA: $gpa");
+  print("ลงทะเบียนแล้ว: $isEnrolled");
+  print("ปีเกิด (ประมาณ): ${2026 - studentAge}");
+ 
+  // === บล็อกที่ 2: Null Safety ===
+  print("\n=== Null Safety ===");
+  String? nickname = null;
+  print("ชื่อเล่น: ${nickname ?? 'ไม่มี'}"); // → ไม่มี
+  nickname = "ชาย";
+  print("ชื่อเล่น: ${nickname ?? 'ไม่มี'}"); // → ชาย
+  print("ความยาว: ${nickname?.length}"); // → 3
+  print("ตัวพิมพ์ใหญ่: ${nickname?.toUpperCase()}"); // → ชาย
+ 
+  // === บล็อกที่ 3: List ===
+  print("\n=== รายวิชาที่ลงทะเบียน ===");
+  // 1) เพิ่ม "Database" ลงใน courses ด้วย (courseScores มีอยู่แล้ว)
+  List<String> courses = ["Mobile Dev", "Web Dev", "AI", "Database"];
+  Map<String, int> courseScores = {
+    "Mobile Dev": 90,
+    "Web Dev": 85,
+    "AI": 92,
+    "Database": 88,
+  };
+ 
+  // วนซ้ำแสดงรายวิชาและคะแนน
+  for (int i = 0; i < courses.length; i++) {
+    String course = courses[i];
+    int? score = courseScores[course];
+    print("${i + 1}. $course: ${score ?? 'ยังไม่มีคะแนน'} คะแนน");
+  }
+ 
+  // คำนวณเฉลี่ย
+  int total = courseScores.values.reduce((a, b) => a + b);
+  double avg = total / courseScores.length;
+  print("คะแนนเฉลี่ย: ${avg.toStringAsFixed(2)}");
+ 
+  // === บล็อกที่ 4: หาวิชาที่ได้คะแนนสูงสุด ===
+  print("\n=== วิชาที่ได้คะแนนสูงสุด ===");
+  // 2) ใช้ courseScores.entries + .reduce() หา MapEntry ที่คะแนนสูงสุด
+  MapEntry<String, int> topCourse = courseScores.entries.reduce(
+    (a, b) => a.value >= b.value ? a : b,
+  );
+  print("วิชาที่ได้คะแนนสูงสุด: ${topCourse.key} (${topCourse.value} คะแนน)");
+ 
+  // === บล็อกที่ 5: นับวิชาที่ได้คะแนน >= 90 ===
+  print("\n=== วิชาที่ได้คะแนน >= 90 ===");
+  // 3) นับจำนวนวิชาที่ได้คะแนน >= 90
+  int countHighScore = courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้คะแนน >= 90: $countHighScore วิชา");
+ 
+  // === บล็อกที่ 6: วิชาที่ผ่านเกณฑ์ (>= 80) ===
+  print("\n=== วิชาที่ผ่านเกณฑ์ (>= 80) ===");
+  // 4) สร้าง Set<String> เก็บเฉพาะวิชาที่ได้คะแนน >= 80
+  Set<String> passedCourses = courseScores.entries
+      .where((entry) => entry.value >= 80)
+      .map((entry) => entry.key)
+      .toSet();
+  print("รายวิชาที่ผ่านเกณฑ์: $passedCourses");
+}
 
 
 ```
