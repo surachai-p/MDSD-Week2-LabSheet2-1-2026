@@ -1619,7 +1619,122 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+
+// ==========================================
+// โจทย์ข้อ 1: Future คำนวณภาษี (อัตราก้าวหน้า)
+// ==========================================
+Future<double> calculateTax(double income) async {
+  // หน่วงเวลาจำลองการประมวลผล 0.5 วินาที
+  await Future.delayed(Duration(milliseconds: 500));
+
+  double tax = 0;
+  double remaining = income;
+
+  // คำนวณภาษีแบบขั้นบันได (Progressive Tax)
+  if (remaining > 500000) {
+    tax += (remaining - 500000) * 0.20; // ส่วนที่เกิน 500,000 คิด 20%
+    remaining = 500000;
+  }
+  if (remaining > 300000) {
+    tax += (remaining - 300000) * 0.10; // ส่วนที่เกิน 300,000 คิด 10%
+    remaining = 300000;
+  }
+  if (remaining > 150000) {
+    tax += (remaining - 150000) * 0.05; // ส่วนที่เกิน 150,000 คิด 5%
+  }
+  // 0 - 150,000 ไม่เสียภาษี (0%)
+
+  return tax;
+}
+
+// ==========================================
+// โจทย์ข้อ 3: Stream จำลองการส่ง Chat Message
+// ==========================================
+Stream<String> simulateChatMessages() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1)); // หน่วงเวลา 1 วินาที
+    yield "💬 ข้อความที่ $i: สวัสดีครับ/ค่ะ!";
+  }
+}
+
+// ==========================================
+// โค้ดเดิมของคุณ: Stream จำลองราคาหุ้น
+// ==========================================
+Stream<double> simulateStockPrice(String symbol) async* {
+  double price = 100.0;
+  int ticks = 0;
+
+  while (ticks < 5) {
+    await Future.delayed(Duration(milliseconds: 500));
+
+    // จำลองการเปลี่ยนราคา
+    double change = (ticks % 2 == 0) ? 2.5 : -1.5;
+    price += change;
+    ticks++;
+
+    yield price; // ส่งค่าออกทาง Stream
+  }
+}
+
+// ==========================================
+// ฟังก์ชันหลัก (รวมการทดสอบทั้งหมด)
+// ==========================================
+void main() async {
+  // ------------------------------------------
+  // ทดสอบโจทย์ข้อ 2: ดึงข้อมูลภาษี 3 คนพร้อมกัน (Future.wait)
+  // ------------------------------------------
+  print("=== 1. คำนวณภาษี (Future.wait) ===");
+  List<double> incomes = [120000, 350000, 600000]; // ตัวอย่างรายได้ 3 คน
+  
+  print("⏳ กำลังคำนวณภาษีพร้อมกัน...");
+  Stopwatch stopwatch = Stopwatch()..start();
+
+  // ประมวลผลแบบ Parallel
+  List<double> taxes = await Future.wait(
+    incomes.map((income) => calculateTax(income))
+  );
+
+  stopwatch.stop();
+
+  double totalTax = 0;
+  for (int i = 0; i < incomes.length; i++) {
+    print("👤 คนที่ ${i + 1} (รายได้ ${incomes[i].toStringAsFixed(0)}): เสียภาษี ${taxes[i].toStringAsFixed(2)} บาท");
+    totalTax += taxes[i];
+  }
+  print("💰 รวมภาษีทั้งหมด: ${totalTax.toStringAsFixed(2)} บาท");
+  print("⏱️ ใช้เวลาประมวลผลไป: ${stopwatch.elapsedMilliseconds} ms\n");
+
+
+  // ------------------------------------------
+  // ทดสอบโจทย์ข้อ 3: แสดง Chat Message (await for)
+  // ------------------------------------------
+  print("=== 2. จำลอง Chat Messages (Stream) ===");
+  await for (String message in simulateChatMessages()) {
+    print(message);
+  }
+  print("✅ จบการสนทนา\n");
+
+
+  // ------------------------------------------
+  // ทดสอบโค้ดเดิม: ราคาหุ้น (Stream)
+  // ------------------------------------------
+  print("=== 3. ราคาหุ้น (Stream) ===");
+  print("Symbol: DART\n");
+
+  double? lastPrice;
+
+  await for (double price in simulateStockPrice("DART")) {
+    String direction = "";
+    if (lastPrice != null) {
+      direction = price > lastPrice! ? "📈 ขึ้น" : "📉 ลง";
+    }
+    print("ราคา: ${price.toStringAsFixed(2)} บาท  $direction");
+    lastPrice = price;
+  }
+
+  print("\n✅ สิ้นสุดการแสดงราคา");
+}
 
 
 ```
