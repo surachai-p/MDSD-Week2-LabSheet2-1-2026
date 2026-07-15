@@ -1,4 +1,4 @@
-# ใบงานการทดลองที่ 2-1
+
 # Dart Programming Fundamentals
 ### วิชา: การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่
 
@@ -253,6 +253,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="1287" height="650" alt="image" src="https://github.com/user-attachments/assets/5f183f11-faa2-46ce-9d60-27bf7225ff14" />
 
 ---
 
@@ -272,11 +273,8 @@ void main() {
 วิชาที่ผ่าน: {Mobile Dev, Web Dev, AI, Database}
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
-```dart
-// บันทึกโค้ดในส่วนนี้
+<img width="1410" height="652" alt="image" src="https://github.com/user-attachments/assets/5bda6b8f-b5ac-4812-9d41-704e56a34676" />
 
-
-```
 ---
 
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
@@ -569,11 +567,8 @@ void main() {
 3. ใช้ `sort()` เรียงนักศึกษาตาม GPA จากสูงไปต่ำ แล้วพิมพ์ข้อมูลนักศึกษาที่มี GPA สูงสุด 3 อันดับแรก
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
-```dart
-// บันทึกโค้ดในส่วนนี้
+<img width="1636" height="810" alt="image" src="https://github.com/user-attachments/assets/f349c844-13ed-4c82-b51b-1ea0715bae20" />
 
-
-```
 ---
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
@@ -917,10 +912,305 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+    : _balance = initial;
+
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) {
+      print("จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    _balance += amount;
+    _history.add(
+      "+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})",
+    );
+    print("ฝาก ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    if (amount > _balance) {
+      print("ยอดเงินไม่เพียงพอ (มี ${_balance.toStringAsFixed(2)} บาท)");
+      return false;
+    }
+    _balance -= amount;
+    _history.add(
+      "- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})",
+    );
+    print("ถอน ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n=== สรุปบัญชี: $ownerName ===");
+    print("ยอดปัจจุบัน: ${_balance.toStringAsFixed(2)} บาท");
+    print("ประวัติรายการ:");
+    if (_history.isEmpty) {
+      print("  (ยังไม่มีรายการ)");
+    } else {
+      _history.forEach((h) => print("  $h"));
+    }
+  }
+
+  @override
+  String toString() =>
+      "BankAccount(${ownerName}, ยอด: ${_balance.toStringAsFixed(2)})";
+}
+
+class SavingsAccount extends BankAccount {
+  final double interestRate; // อัตราดอกเบี้ยต่อปี เช่น 0.03 = 3%
+
+  SavingsAccount({
+    required String ownerName,
+    required this.interestRate,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (_balance - amount < 500) {
+      print("บัญชีออมทรัพย์ต้องมียอดขั้นต่ำ 500 บาท");
+      return false;
+    }
+    return super.withdraw(amount);
+  }
+
+  void applyMonthlyInterest() {
+    double interest = _balance * interestRate / 12;
+    _balance += interest;
+    _history.add("+ ดอกเบี้ยรายเดือน ${interest.toStringAsFixed(2)} บาท");
+    print("ดอกเบี้ยเดือนนี้: ${interest.toStringAsFixed(2)} บาท");
+  }
+}
+
+// โจทย์ข้อที่ 1: CheckingAccount (ถอนเงินเกินบัญชีได้ และคิดค่าธรรมเนียม)
+class CheckingAccount extends BankAccount {
+  final double overdraftLimit = 500.0; // วงเงินถอนเกินบัญชีสูงสุด
+  final double overdraftFee = 50.0; // ค่าธรรมเนียมเมื่อใช้ Overdraft
+
+  CheckingAccount({required String ownerName, double initial = 0})
+    : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+    // กรณีถอนเงินปกติ (ยอดเงินพอถอน)
+    if (amount <= _balance) {
+      return super.withdraw(amount);
+    }
+
+    // กรณีถอนเงินเกินบัญชี (Overdraft)
+    // เพิ่มเงื่อนไข: ยอดถอนต้องไม่เกิน 500 บาท หากเกินจะไม่สามารถถอนแบบ Overdraft ได้
+    if (amount > 500) {
+      print("ยอดเงินในบัญชีไม่พอ เเละยอดถอนเกิน 500 บาทไม่สามารถถอดแบบOverdraftได้");
+      return false;
+    }
+
+    double totalDeduction = amount + overdraftFee;
+    if (_balance - totalDeduction < -overdraftLimit) {
+      print(
+        "ยอดเงินไม่เพียงพอและเกินวงเงิน Overdraft (ยอดคงเหลือรวมค่าธรรมเนียม ${overdraftFee.toInt()} บาท )",
+      );
+      return false;
+    }
+
+    // ดำเนินการหักเงินส่วนที่ถอน
+    _balance -= amount;
+    _history.add(
+      "- ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})",
+    );
+    print("ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+
+    // ดำเนินการหักค่าธรรมเนียม Overdraft
+    _balance -= overdraftFee;
+    _history.add(
+      "- ค่าธรรมเนียม Overdraft ${overdraftFee.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})",
+    );
+    print("คิดค่าธรรมเนียม Overdraft ${overdraftFee.toStringAsFixed(2)} บาท");
+
+    return true;
+  }
+}
+
+// โจทย์ข้อที่ 2: Abstract Class Vehicle และคลาสลูก (Car, Truck)
+abstract class Vehicle {
+  double _fuel = 0.0; // น้ำมันที่เหลือในถัง (ลิตร)
+
+  // Abstract Getter
+  double get fuelEfficiency; // อัตราสิ้นเปลืองน้ำมัน (กม./ลิตร)
+  double get fuel => _fuel;
+
+  void refuel(double liters) {
+    if (liters <= 0) {
+      print("จำนวนน้ำมันที่เติมต้องมากกว่า 0 ลิตร");
+      return;
+    }
+    _fuel += liters;
+    print(
+      "เติมน้ำมัน +${liters.toStringAsFixed(2)} ลิตร (น้ำมันคงเหลือ: ${_fuel.toStringAsFixed(2)} ลิตร)",
+    );
+  }
+
+  void drive(double km) {
+    if (km <= 0) {
+      print("ระยะทางวิ่งต้องมากกว่า 0 กม.");
+      return;
+    }
+    double fuelNeeded = km / fuelEfficiency;
+    if (fuelNeeded > _fuel) {
+      print(
+        "น้ำมันไม่พอวิ่งระยะทาง $km กม. (ต้องการ ${fuelNeeded.toStringAsFixed(2)} ลิตร แต่มีแค่ ${_fuel.toStringAsFixed(2)} ลิตร)",
+      );
+    } else {
+      _fuel -= fuelNeeded;
+      print(
+        "วิ่งระยะทาง $km กม. สำเร็จ (ใช้น้ำมัน ${fuelNeeded.toStringAsFixed(2)} ลิตร, น้ำมันคงเหลือ ${_fuel.toStringAsFixed(2)} ลิตร)",
+      );
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // รถยนต์: ประหยัดน้ำมัน วิ่งได้ 15 กม. ต่อลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 6.0; // รถบรรทุก: กินน้ำมันมากกว่า วิ่งได้ 6 กม. ต่อลิตร
+}
+
+// โจทย์ข้อที่ 3: Mixin Discountable และ Class Product
+mixin Discountable {
+  // บังคับให้คลาสที่ใช้ Mixin นี้ ต้องมี getter/setter สำหรับ price
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    if (percent < 0 || percent > 100) {
+      print("❌ เปอร์เซ็นต์ส่วนลดต้องอยู่ระหว่าง 0 ถึง 100");
+      return;
+    }
+    double discountAmount = price * (percent / 100);
+    price -= discountAmount;
+    print(
+      "ลดราคาสำเร็จ $percent% (ลดไป ${discountAmount.toStringAsFixed(2)} บาท)",
+    );
+  }
+}
+
+class Product with Discountable {
+  final String name;
+  @override
+  double price; // กำหนดให้แก้ค่า price ได้เพื่อรับส่วนลด
+
+  Product({required this.name, required this.price});
+
+  @override
+  String toString() => "สินค้า: $name, ราคา: ${price.toStringAsFixed(2)} บาท";
+}
+
+void main() {
+  print("=== [ORIGINAL] ทดสอบ BankAccount ===\n");
+  var acc = BankAccount(ownerName: "สมชาย", initial: 1000);
+  acc.deposit(500);
+  acc.withdraw(200);
+  acc.withdraw(2000); // เกินยอด
+  acc.withdraw(-100); // ค่าไม่ถูก
+  acc.printStatement();
+
+  print("\n=== [ORIGINAL] ทดสอบ SavingsAccount ===\n");
+  var savings = SavingsAccount(
+    ownerName: "สมหญิง",
+    interestRate: 0.03,
+    initial: 1000,
+  );
+  savings.deposit(5000);
+  savings.withdraw(5600); // เหลือน้อยกว่า 500
+  savings.withdraw(3000); // ได้
+  savings.applyMonthlyInterest();
+  savings.printStatement();
+
+  // Polymorphism เดิม
+  print("\n=== [ORIGINAL] Polymorphism ===");
+  List<BankAccount> accounts = [acc, savings];
+  for (var account in accounts) {
+    print(account);
+  }
+
+  print("\n" + "=" * 40);
+  print("        เริ่มต้นทดสอบฟังก์ชันใหม่");
+  print("=" * 40);
+
+  // ทดสอบ 1: CheckingAccount (Overdraft)
+  print("\n=== [NEW] ทดสอบ CheckingAccount (Overdraft) ===\n");
+  var checking = CheckingAccount(ownerName: "สมรักษ์", initial: 1000);
+
+  checking.deposit(200); // มี 1200
+  checking.withdraw(1100); // ถอนปกติ (เหลือ 100)
+
+  // ถอนเกินยอด (Overdraft): มี 100 ถอน 200 -> ยอดจะติดลบ 100 และเสียค่าธรรมเนียม 50 -> ยอดรวมติดลบ 150 (ไม่เกิน 500 ถอนได้!)
+  checking.withdraw(200);
+
+  // พยายามถอนเกินยอดจนเกินขอบเขต Overdraft (-500)
+  checking.withdraw(
+    400,
+  ); // ยอดปัจจุบัน -150 ถ้าหัก 400 + ค่าธรรมเนียม 50 = -600 (เกินลิมิต 500 -> ต้องถอนไม่สำเร็จ)
+
+  // เพิ่มตัวอย่างทดสอบเงื่อนไขถอนเกิน 500 
+  print("\n-- ทดสอบถอนแบบ Overdraft แต่ยอดถอนเกิน 500 บาท --");
+  checking.withdraw(600); 
+
+  checking.printStatement();
+
+  // ทดสอบ 2: Abstract Class & Inheritance (Vehicle, Car, Truck)
+  print("\n=== [NEW] ทดสอบ Vehicle, Car, Truck ===\n");
+
+  print("--- ทดสอบรถยนต์ (Car: 15 กม./ลิตร) ---");
+  var myCar = Car();
+  myCar.refuel(10); // เติมน้ำมัน 10 ลิตร
+  myCar.drive(60); // วิ่ง 60 กม. (ใช้น้ำมัน 4 ลิตร -> เหลือ 6 ลิตร)
+  myCar.drive(
+    100,
+  ); // วิ่ง 100 กม. (ต้องการน้ำมัน 6.67 ลิตร แต่เหลือแค่ 6 ลิตร -> น้ำมันไม่พอ)
+
+  print("\n--- ทดสอบรถบรรทุก (Truck: 6 กม./ลิตร) ---");
+  var myTruck = Truck();
+  myTruck.refuel(10); // เติมน้ำมัน 10 ลิตร
+  myTruck.drive(30); // วิ่ง 30 กม. (ใช้น้ำมัน 5 ลิตร -> เหลือ 5 ลิตร)
+
+  // ทดสอบ 3: Mixin & Class (Discountable & Product)
+  print("\n=== [NEW] ทดสอบ Mixin Discountable ===\n");
+  var product1 = Product(name: "หูฟังไร้สาย", price: 1500.0);
+  print("ก่อนลดราคา -> $product1");
+
+  product1.applyDiscount(10); // ลดราคา 10%
+  print("หลังลดราคา -> $product1");
+}
 
 
 ```
+<img width="563" height="542" alt="image" src="https://github.com/user-attachments/assets/8e088f54-d06f-4e73-8361-6048ece622d0" />
+
+<img width="580" height="685" alt="image" src="https://github.com/user-attachments/assets/41931cf8-aa01-4d8b-82cd-a30b894eeb84" />
+
+
 ---
 
 ## ส่วนที่ 4 — ทฤษฎีและการทดลอง: Async/Await และ Future
@@ -1152,9 +1442,9 @@ void main() async {
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 3050 ms
+Parallel ใช้เวลา:  994 ms
+ประหยัดเวลาได้:     2056 ms (67.41%)
 ```
 
 ---
@@ -1218,10 +1508,110 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+// ==============================
+// จำลองการดึงข้อมูลรายได้ผู้ใช้
+// ==============================
+Future<double> fetchIncome(int userId) async {
+  print("[API] กำลังดึงรายได้ของ User $userId...");
+  await Future.delayed(Duration(milliseconds: 600));
+
+  switch (userId) {
+    case 1:
+      return 120000;
+    case 2:
+      return 280000;
+    case 3:
+      return 650000;
+    default:
+      return 0;
+  }
+}
+
+// ==============================
+// คำนวณภาษี
+// ==============================
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+
+  if (income <= 150000) {
+    return 0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+// ==============================
+// Stream จำลอง Chat Message
+// ==============================
+Stream<String> chatMessages() async* {
+  List<String> messages = [
+    "สวีดัส สวัสดี",
+    "กำลังทำงานส่งอาจารย์สุรชัย",
+    "ตอนไหนจะเส็จนะ",
+    "ง่วงแล้วนะ",
+    "เสร็จเรียบร้อยรอส่ง",
+  ];
+
+  for (String message in messages) {
+    await Future.delayed(Duration(seconds: 1));
+    yield message;
+  }
+}
+
+// ==============================
+// Main
+// ==============================
+void main() async {
+  print("========== Future.wait ==========\n");
+
+  // ดึงรายได้พร้อมกัน
+  List<double> incomes = await Future.wait([
+    fetchIncome(1),
+    fetchIncome(2),
+    fetchIncome(3),
+  ]);
+
+  print("\nเริ่มคำนวณภาษี...\n");
+
+  // คำนวณภาษีพร้อมกัน
+  List<double> taxes = await Future.wait(
+    incomes.map((income) => calculateTax(income)),
+  );
+
+  double totalTax = 0;
+
+  for (int i = 0; i < incomes.length; i++) {
+    print(
+      "User ${i + 1} | รายได้: ${incomes[i].toStringAsFixed(2)} บาท | "
+      "ภาษี: ${taxes[i].toStringAsFixed(2)} บาท",
+    );
+    totalTax += taxes[i];
+  }
+
+  print("\nภาษีรวมทั้งหมด = ${totalTax.toStringAsFixed(2)} บาท");
+
+  // ==========================
+  // Stream
+  // ==========================
+  print("\n========== Chat Stream ==========\n");
+
+  await for (String message in chatMessages()) {
+    print("$message");
+  }
+
+  print("\nสิ้นสุดการรับข้อความ");
+}
 
 ```
+
+<img width="491" height="442" alt="image" src="https://github.com/user-attachments/assets/3a25d2ff-36e5-4864-93bb-94f233e1df90" />
+
 ---
 
 
@@ -1229,28 +1619,32 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
-
+final กำหนดค่าได้ครั้งเดียวตอนโปรแกรมทำงาน (Runtime) เช่น DateTime.now()
+ส่วน const เป็นค่าคงที่ที่ต้องรู้ตั้งแต่ Compile Time เช่น const pi = 3.14;
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
-
-
+Positional Parameters ส่งค่าตามลำดับ
+Named Parameters ส่งค่าโดยระบุชื่อ อ่านง่ายกว่า
+ใช้ Positional เมื่อมีพารามิเตอร์น้อย และใช้ Named เมื่อมีหลายพารามิเตอร์หรือมีค่า Optional
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
-
+Abstract Class กำหนดโครงสร้างที่คลาสลูกต้องทำตาม ระบบธนาคารกำหนดให้บัญชีทุกประเภทต้องมีเมธอด deposit() และ withdraw()
+Mixin ใช้เพิ่มความสามารถให้หลายคลาสโดยไม่ต้องสืบทอด เพิ่มความสามารถในการบันทึก Log ให้ทั้งคลาส User และ Product
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
-
-
+Sequential 3050 ms
+Parallel 994 ms
+Parallel เร็วกว่าเพราะทำงานพร้อมกัน ส่วน Sequential ใช้เมื่องานถัดไปต้องรอผลจากงานก่อน
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
-
-
+Future ได้ผลลัพธ์ครั้งเดียว เช่น ดึงข้อมูลจาก API
+Stream ได้ข้อมูลหลายครั้งต่อเนื่อง เช่น ระบบแชทหรือราคาหุ้นแบบเรียลไทม์
 ```
 ---
 
