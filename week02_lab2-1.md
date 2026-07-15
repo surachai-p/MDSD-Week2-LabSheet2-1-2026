@@ -210,6 +210,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 3** กด **Run** ตรวจสอบผลลัพธ์ที่ได้
+<img width="1917" height="1020" alt="image" src="https://github.com/user-attachments/assets/fe291ea9-7ee8-4a2a-88d6-3458a03261af" />
 
 **ขั้นตอนที่ 4** เพิ่มโค้ดต่อไปนี้ **ต่อท้าย** ภายใน `main()` ก่อนปิด `}`
 
