@@ -1,12 +1,14 @@
 # ใบงานการทดลองที่ 2-1
+
 # Dart Programming Fundamentals
+
 ### วิชา: การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่
 
-| | |
-|--|--|
-| **สัปดาห์ที่** | 2 |
-| **ใบงานที่** | 2-1 จาก 2 |
-| **เวลา** | 2 ชั่วโมง 30 นาที |
+|                |                       |
+| -------------- | --------------------- |
+| **สัปดาห์ที่** | 2                     |
+| **ใบงานที่**   | 2-1 จาก 2             |
+| **เวลา**       | 2 ชั่วโมง 30 นาที     |
 | **เครื่องมือ** | DartPad (dartpad.dev) |
 
 ---
@@ -54,15 +56,15 @@ Dart เป็นภาษา **Strongly Typed** หมายความว่�
 
 **ชนิดข้อมูลพื้นฐานใน Dart:**
 
-| ชนิด | ความหมาย | ตัวอย่างค่า |
-|------|----------|-----------|
-| `int` | จำนวนเต็ม | `0`, `42`, `-10` |
-| `double` | จำนวนทศนิยม | `3.14`, `2.0`, `-0.5` |
-| `String` | ข้อความ | `"สวัสดี"`, `'hello'` |
-| `bool` | ค่าจริง/เท็จ | `true`, `false` |
-| `List<T>` | รายการ (Array) | `[1, 2, 3]` |
-| `Map<K,V>` | คู่ Key-Value | `{"name": "ชาย"}` |
-| `Set<T>` | ชุดไม่ซ้ำ | `{1, 2, 3}` |
+| ชนิด       | ความหมาย       | ตัวอย่างค่า           |
+| ---------- | -------------- | --------------------- |
+| `int`      | จำนวนเต็ม      | `0`, `42`, `-10`      |
+| `double`   | จำนวนทศนิยม    | `3.14`, `2.0`, `-0.5` |
+| `String`   | ข้อความ        | `"สวัสดี"`, `'hello'` |
+| `bool`     | ค่าจริง/เท็จ   | `true`, `false`       |
+| `List<T>`  | รายการ (Array) | `[1, 2, 3]`           |
+| `Map<K,V>` | คู่ Key-Value  | `{"name": "ชาย"}`     |
+| `Set<T>`   | ชุดไม่ซ้ำ      | `{1, 2, 3}`           |
 
 **การประกาศตัวแปร:**
 
@@ -266,17 +268,52 @@ void main() {
 4. สร้าง `Set<String>` ชื่อ `passedCourses` ที่เก็บเฉพาะวิชาที่ได้คะแนน >= 80 แล้วพิมพ์รายการ
 
 **ผลลัพธ์ที่คาดหวัง (ตัวอย่าง):**
+
 ```
 วิชาที่ได้คะแนนสูงสุด: AI (92 คะแนน)
 จำนวนวิชาที่ได้ >= 90: 2 วิชา
 วิชาที่ผ่าน: {Mobile Dev, Web Dev, AI, Database}
 ```
+
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
 ```dart
-// บันทึกโค้ดในส่วนนี้
+void main() {
+  List<String> courses = ["Mobile Dev", "Web Dev", "AI"];
+  Map<String, int> courseScores = {
+    "Mobile Dev": 90,
+    "Web Dev": 85,
+    "AI": 92,
+  };
+
+  // 1. เพิ่มวิชา Database
+  courses.add("Database");
+  courseScores["Database"] = 88;
+
+  // 2. หาวิชาคะแนนสูงสุด
+  // การใช้ reduce จะเอา entry 2 ตัวมาเทียบกันเรื่อยๆ (a และ b) แล้วคืนค่าตัวที่มากที่สุดกลับไปเป็น a ในรอบถัดไป
+  var maxCourse = courseScores.entries.reduce((a, b) => a.value > b.value ? a : b);
+  print("วิชาที่ได้คะแนนสูงสุด: ${maxCourse.key} (${maxCourse.value} คะแนน)");
+
+  // 3. นับจำนวนวิชาที่ได้ >= 90
+  int highScoresCount = courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $highScoresCount วิชา");
+
+  // 4. สร้าง Set วิชาที่ผ่าน
+  Set<String> passedCourses = courseScores.entries
+      .where((entry) => entry.value >= 80) // กรองคะแนน
+      .map((entry) => entry.key)           // เอาเฉพาะชื่อวิชา
+      .toSet();                            // แปลงเป็น Set
+
+  print("วิชาที่ผ่าน: $passedCourses");
+}
+
 
 
 ```
+
+![alt text](image-1.png)
+
 ---
 
 ## ส่วนที่ 2 — ทฤษฎีและการทดลอง: Functions
@@ -569,12 +606,60 @@ void main() {
 3. ใช้ `sort()` เรียงนักศึกษาตาม GPA จากสูงไปต่ำ แล้วพิมพ์ข้อมูลนักศึกษาที่มี GPA สูงสุด 3 อันดับแรก
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
 ```dart
-// บันทึกโค้ดในส่วนนี้
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === 1. Function หานักศึกษาที่ GPA สูงสุดตามคณะ ===
+  String findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+    // กรองเอาเฉพาะคนในคณะที่ระบุ
+    var facultyStudents = students.where((s) => s["faculty"] == faculty).toList();
+    if (facultyStudents.isEmpty) return "ไม่มีข้อมูล";
+
+    // หาคนที่ GPA สูงสุด (ระบุ Type ของ a และ b ให้ชัดเจนเพื่อแก้ Error)
+    var topStudent = facultyStudents.reduce((Map<String, dynamic> a, Map<String, dynamic> b) {
+      return (a["gpa"] as double) > (b["gpa"] as double) ? a : b;
+    });
+
+    return topStudent["name"];
+  }
+  print("Top วิศวกรรม: ${findTopStudentByFaculty(students, 'วิศวกรรม')}");
+
+  // === 2. Function จัดกลุ่มตามคณะ ===
+  Map<String, List<Map<String, dynamic>>> groupByFaculty(List<Map<String, dynamic>> students) {
+    Map<String, List<Map<String, dynamic>>> grouped = {};
+    for (var s in students) {
+      String faculty = s["faculty"];
+      if (!grouped.containsKey(faculty)) {
+        grouped[faculty] = []; // ถ้ายังไม่มีคณะนี้ ให้สร้าง list เปล่า
+      }
+      grouped[faculty]!.add(s);
+    }
+    return grouped;
+  }
+  print("กลุ่มคณะที่มี: ${groupByFaculty(students).keys.toList()}");
+
+  // === 3. เรียงลำดับ GPA และโชว์ Top 3 ===
+  students.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+  print("\n=== Top 3 Students ===");
+  for (int i = 0; i < 3 && i < students.length; i++) {
+    print("${i + 1}. ${students[i]["name"]} - GPA: ${students[i]["gpa"]}");
+  }
+}
+
 
 
 ```
----
+
+## ![alt text](image-2.png)
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
 
@@ -914,13 +999,98 @@ void main() {
 
 3. สร้าง Mixin `Discountable` ที่มี method `applyDiscount(double percent)` แล้วนำไปใช้กับ Class `Product` ที่มี `name` และ `price`
 
-
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// === ข้อ 1: CheckingAccount ===
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  BankAccount({required this.ownerName, double initial = 0}) : _balance = initial;
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    return true;
+  }
+}
+
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) return false;
+    if (amount > super._balance + 500) {
+      print("ยอดเงินไม่พอ (Overdraft ได้ไม่เกิน 500 บาท)");
+      return false;
+    }
+
+    if (amount > super._balance) {
+      super._balance -= (amount + 50); // หักยอดปกติ + ค่าธรรมเนียม 50
+      print("ถอนเงินสำเร็จ: หักค่าธรรมเนียม 50 บาท เนื่องจาก Overdraft");
+    } else {
+      super._balance -= amount;
+      print("ถอนเงินสำเร็จ");
+    }
+    return true;
+  }
+}
+
+// === ข้อ 2: Abstract Class Vehicle ===
+abstract class Vehicle {
+  double get fuelEfficiency; // กิโลเมตรต่อลิตร
+  void refuel(double liters);
+  double drive(double km) {
+    return km / fuelEfficiency; // คืนค่าน้ำมันที่ใช้ (ลิตร)
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // สมมติ 15 กม./ลิตร
+
+  @override
+  void refuel(double liters) => print("Car เติมน้ำมัน $liters ลิตร");
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0; // กินน้ำมันกว่า (8 กม./ลิตร)
+
+  @override
+  void refuel(double liters) => print("Truck เติมน้ำมัน $liters ลิตร");
+}
+
+// === ข้อ 3: Mixin Discountable ===
+mixin Discountable {
+  double applyDiscount(double originalPrice, double percent) {
+    return originalPrice - (originalPrice * (percent / 100));
+  }
+}
+
+class Product with Discountable {
+  String name;
+  double price;
+  Product({required this.name, required this.price});
+
+  double getDiscounted(double percent) {
+    return applyDiscount(price, percent);
+  }
+}
+
+void main() {
+  // Test Product with Mixin
+  var shirt = Product(name: "เสื้อ", price: 1000);
+  print("ราคาก่อนลด: 1000, ลด 10%: ${shirt.getDiscounted(10)}");
+}
 
 
 ```
+
+![alt text](image-3.png)
+
 ---
 
 ## ส่วนที่ 4 — ทฤษฎีและการทดลอง: Async/Await และ Future
@@ -1217,54 +1387,154 @@ void main() async {
 3. สร้าง `Stream<String>` ที่จำลองการส่ง Chat Message ทุก 1 วินาที เป็นเวลา 5 ครั้ง แล้วแสดงผลผ่าน `await for`
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// === ข้อ 1: CheckingAccount ===
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  BankAccount({required this.ownerName, double initial = 0}) : _balance = initial;
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    return true;
+  }
+}
+
+class CheckingAccount extends BankAccount {
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) return false;
+    if (amount > super._balance + 500) {
+      print("ยอดเงินไม่พอ (Overdraft ได้ไม่เกิน 500 บาท)");
+      return false;
+    }
+
+    if (amount > super._balance) {
+      super._balance -= (amount + 50); // หักยอดปกติ + ค่าธรรมเนียม 50
+      print("ถอนเงินสำเร็จ: หักค่าธรรมเนียม 50 บาท เนื่องจาก Overdraft");
+    } else {
+      super._balance -= amount;
+      print("ถอนเงินสำเร็จ");
+    }
+    return true;
+  }
+}
+
+// === ข้อ 2: Abstract Class Vehicle ===
+abstract class Vehicle {
+  double get fuelEfficiency; // กิโลเมตรต่อลิตร
+  void refuel(double liters);
+  double drive(double km) {
+    return km / fuelEfficiency; // คืนค่าน้ำมันที่ใช้ (ลิตร)
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // สมมติ 15 กม./ลิตร
+
+  @override
+  void refuel(double liters) => print("Car เติมน้ำมัน $liters ลิตร");
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0; // กินน้ำมันกว่า (8 กม./ลิตร)
+
+  @override
+  void refuel(double liters) => print("Truck เติมน้ำมัน $liters ลิตร");
+}
+
+// === ข้อ 3: Mixin Discountable ===
+mixin Discountable {
+  double applyDiscount(double originalPrice, double percent) {
+    return originalPrice - (originalPrice * (percent / 100));
+  }
+}
+
+class Product with Discountable {
+  String name;
+  double price;
+  Product({required this.name, required this.price});
+
+  double getDiscounted(double percent) {
+    return applyDiscount(price, percent);
+  }
+}
+
+void main() {
+  // Test Product with Mixin
+  var shirt = Product(name: "เสื้อ", price: 1000);
+  print("ราคาก่อนลด: 1000, ลด 10%: ${shirt.getDiscounted(10)}");
+}
+
 
 
 ```
----
 
+## ![alt text](image-4.png)
 
 ### คำถามท้ายใบงาน
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
-```text
 
+```text
+final: ค่าคงที่ที่ถูกกำหนดค่าได้ครั้งเดียวตอน Runtime ตัวอย่างเช่น ตัวแปรที่เก็บค่าเวลาในขณะนั้น (DateTime.now())
+const: ค่าคงที่ที่ต้องทราบค่าที่แน่นอนตั้งแต่ตอน Compile-time (เวลาเขียนโค้ด) ไม่สามารถเปลี่ยนแปลงได้เลย เช่น ค่า Pi (const pi = 3.14)
 
 ```
+
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
+
 ```text
+Positional Parameters: โยนค่าเรียงตามลำดับที่ประกาศไว้ เหมาะกับฟังก์ชันที่รับตัวแปรน้อยและทุกตัวแปรมีความสำคัญ (เช่น sum(a, b))
+Named Parameters: กำหนดค่าโดยใช้ชื่อตัวแปร ทำให้สลับลำดับได้และอ่านโค้ดเข้าใจง่ายมาก เหมาะกับฟังก์ชันที่มี Parameters หลายตัว โดยเฉพาะเวลาเขียน UI อย่าง Flutter
 
 
 ```
+
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
-```text
 
+```text
+Abstract Class: ใช้กำหนด "แม่แบบ (Blueprint)" ให้ Class ลูก (Subclass) ว่าต้องมีอะไรบ้าง (is-a relationship) เช่น แมว เป็น สัตว์ (Cat extends Animal)
+Mixin: ใช้ดึง "ความสามารถ (Behavior)" เข้ามาประกอบใน Class อื่น โดยไม่จำเป็นต้องอยู่ในสายพันธุ์เดียวกัน (has-a / can-do) เช่น คน สามารถ ว่ายน้ำได้ (Person with Swimmable) เป็ดก็ว่ายได้เช่นกัน
 
 ```
+
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
-```text
 
+```text
+Parallel เร็วกว่าเพราะ มันรัน Task ที่เป็นอิสระต่อกันพร้อมๆ กัน เวลาที่ใช้จะเท่ากับ Task ที่ช้าที่สุด
+ต้องใช้ Sequential เมื่อ Task ที่สอง "ต้องใช้ผลลัพธ์" จาก Task แรกเป็น Input (เช่น ต้อง Login ให้เสร็จก่อน ถึงจะดึง Profile User คนนั้นได้)
 
 ```
+
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
-```text
 
+```text
+Future: รอผลลัพธ์เพียง 1 อย่าง (คืนค่ามา "ครั้งเดียว" แล้วจบ) เช่น การสั่งเปิดไฟล์ หรือรอค่าจากการกดปุ่ม 1 ครั้ง
+Stream: ข้อมูลไหลมาอย่างต่อเนื่องทีละชุด (เหมือนท่อน้ำ) เช่น ข้อความแชท, ข้อมูลพิกัด GPS บนแผนที่ที่อัปเดตตลอดเวลา
 
 ```
+
 ---
 
 ## ข้อผิดพลาดที่พบบ่อย
 
-| Error Message | สาเหตุ | วิธีแก้ |
-|---|---|---|
-| `A value of type 'Null' can't be assigned...` | กำหนด null ให้ตัวแปร non-nullable | เพิ่ม `?` หรือกำหนดค่าเริ่มต้น |
-| `The getter '...' isn't defined` | เรียก method ที่ไม่มีใน Type นั้น | ตรวจสอบ Type ของตัวแปร |
-| `Non-abstract class '...' missing concrete implementation` | ไม่ได้ implement abstract method | เพิ่ม `@override` และ implement method |
-| `Uncaught Error: ...` | Future throw Error แต่ไม่มี try/catch | ห่อด้วย try/catch |
-| `setState() or markNeedsBuild()...` (บน Flutter) | เรียก setState หลัง dispose | เช็ค `if (mounted)` ก่อน setState |
+| Error Message                                              | สาเหตุ                                | วิธีแก้                                |
+| ---------------------------------------------------------- | ------------------------------------- | -------------------------------------- |
+| `A value of type 'Null' can't be assigned...`              | กำหนด null ให้ตัวแปร non-nullable     | เพิ่ม `?` หรือกำหนดค่าเริ่มต้น         |
+| `The getter '...' isn't defined`                           | เรียก method ที่ไม่มีใน Type นั้น     | ตรวจสอบ Type ของตัวแปร                 |
+| `Non-abstract class '...' missing concrete implementation` | ไม่ได้ implement abstract method      | เพิ่ม `@override` และ implement method |
+| `Uncaught Error: ...`                                      | Future throw Error แต่ไม่มี try/catch | ห่อด้วย try/catch                      |
+| `setState() or markNeedsBuild()...` (บน Flutter)           | เรียก setState หลัง dispose           | เช็ค `if (mounted)` ก่อน setState      |
 
 ---
 
-*ใบงานการทดลองที่ 2-1 | Dart Programming*
-*วิชา: การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่*
+_ใบงานการทดลองที่ 2-1 | Dart Programming_
+_วิชา: การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่_
