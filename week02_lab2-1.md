@@ -1584,9 +1584,78 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
 
+// ==========================================
+// ข้อ 1: คำนวณภาษีตามอัตราก้าวหน้า (มี delay 0.5 วินาที)
+// ==========================================
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+  
+  double tax = 0;
+  if (income <= 150000) {
+    tax = 0; // 0%
+  } else if (income <= 300000) {
+    tax = (income - 150000) * 0.05; // 5% ของส่วนที่เกิน 150,000
+  } else if (income <= 500000) {
+    tax = (150000 * 0.05) + ((income - 300000) * 0.10); // 10% ของส่วนที่เกิน 300,000
+  } else {
+    tax = (150000 * 0.05) + (200000 * 0.10) + ((income - 500000) * 0.20); // 20% ของส่วนที่เกิน 500,000
+  }
+  return tax;
+}
 
+// (ฟังก์ชันเสริม) เพื่อจำลองการดึงรายได้จาก API หรือ Database
+Future<double> fetchUserIncome(int userId, double income) async {
+  await Future.delayed(Duration(seconds: 1)); // จำลองดีเลย์ 1 วินาที
+  return income;
+}
+
+// ==========================================
+// ข้อ 3: จำลองการส่ง Chat Message ทุก 1 วินาที เป็นเวลา 5 ครั้ง
+// ==========================================
+Stream<String> simulateChatMessages() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1));
+    yield "ข้อความที่ $i: สวัสดีครับ!";
+  }
+}
+
+// ==========================================
+// ข้อ 2: ฟังก์ชัน main() 
+// ==========================================
+void main() async {
+  print("=== ดึงข้อมูลและคำนวณภาษี ===");
+  print("กำลังดึงข้อมูลรายได้ของผู้ใช้ 3 คน...");
+  
+  // ใช้ Future.wait ดึงข้อมูลรายได้พร้อมกัน 3 คน
+  List<double> incomes = await Future.wait([
+    fetchUserIncome(1, 120000), // รายได้ไม่เกิน 150,000 (ภาษี 0)
+    fetchUserIncome(2, 250000), // รายได้ช่วง 150,001 - 300,000 (โดน 5%)
+    fetchUserIncome(3, 600000), // รายได้เกิน 500,000 (โดนถึงฐาน 20%)
+  ]);
+
+  double totalTax = 0;
+
+  // คำนวณภาษีแต่ละคนและแสดงผลรวม
+  for (int i = 0; i < incomes.length; i++) {
+    double tax = await calculateTax(incomes[i]);
+    totalTax += tax;
+    print("👤 ผู้ใช้คนที่ ${i + 1}: รายได้ ${incomes[i]} บาท -> เสียภาษี ${tax} บาท");
+  }
+
+  print("💰 ผลรวมภาษีทั้งหมด: $totalTax บาท");
+  print("-" * 40);
+
+  // การทำงานของข้อ 3
+  print("\n=== Stream: Chat Message ===");
+  // ใช้ await for วนลูปรับค่าจาก Stream
+  await for (String message in simulateChatMessages()) {
+    print("💬 $message");
+  }
+  
+  print("✅ สิ้นสุดการส่งข้อความ");
+}
 ```
 ---
 
