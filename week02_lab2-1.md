@@ -253,6 +253,8 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/fbf5dc2a-7ef7-4709-aa68-28407f5bc4bd" />
+
 
 ---
 
@@ -274,6 +276,72 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+void main() {
+  // === บล็อกที่ 1: ชนิดข้อมูลพื้นฐาน ===
+  String studentName = "สมชาย ดีใจ";
+  int studentAge = 20;
+  double gpa = 3.75;
+  bool isEnrolled = true;
+  print("=== ข้อมูลนักศึกษา ===");
+  print("ชื่อ: $studentName");
+  print("อายุ: $studentAge ปี");
+  print("GPA: $gpa");
+  print("ลงทะเบียนแล้ว: $isEnrolled");
+  print("ปีเกิด (ประมาณ): ${2026 - studentAge}");
+
+  // === บล็อกที่ 2: Null Safety ===
+  print("\n=== Null Safety ===");
+  String? nickname = null;
+  print("ชื่อเล่น: ${nickname ?? 'ไม่มี'}"); // → ไม่มี
+  nickname = "ชาย";
+  print("ชื่อเล่น: ${nickname}"); // → ชาย
+  print("ความยาว: ${nickname.length}"); // → 3
+  print("ตัวพิมพ์ใหญ่: ${nickname.toUpperCase()}"); // → ชาย
+
+  // === บล็อกที่ 3: List ===
+  print("\n=== รายวิชาที่ลงทะเบียน ===");
+  List<String> courses = ["Mobile Dev", "Web Dev", "AI"];
+  Map<String, int> courseScores = {
+    "Mobile Dev": 90,
+    "Web Dev": 85,
+    "AI": 92,
+  };
+
+  // 1. เพิ่มวิชา Database คะแนน 88
+  courses.add("Database");
+  courseScores["Database"] = 88;
+
+  // วนซ้ำแสดงรายวิชาและคะแนน
+  for (int i = 0; i < courses.length; i++) {
+    String course = courses[i];
+    int? score = courseScores[course];
+    print("${i + 1}. $course: ${score ?? 'ยังไม่มีคะแนน'} คะแนน");
+  }
+
+  // คำนวณเฉลี่ย
+  int total = courseScores.values.reduce((a, b) => a + b);
+  double avg = total / courseScores.length;
+  print("คะแนนเฉลี่ย: ${avg.toStringAsFixed(2)}");
+
+  // 2. หาวิชาที่ได้คะแนนสูงสุด
+  print("\n=== สรุปผลการเรียน ===");
+  MapEntry<String, int> topCourse = courseScores.entries.reduce(
+    (a, b) => a.value >= b.value ? a : b,
+  );
+  print("วิชาที่ได้คะแนนสูงสุด: ${topCourse.key} (${topCourse.value} คะแนน)");
+
+  // 3. นับจำนวนวิชาที่ได้คะแนน >= 90
+  int countHighScore =
+      courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $countHighScore วิชา");
+
+  // 4. สร้าง Set ของวิชาที่ผ่าน (>= 80)
+  Set<String> passedCourses = courseScores.entries
+      .where((entry) => entry.value >= 80)
+      .map((entry) => entry.key)
+      .toSet();
+  print("วิชาที่ผ่าน: $passedCourses");
+}
 
 
 ```
@@ -571,6 +639,114 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.67, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.18, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 2.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.20, "year": 3, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.91, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === where() — กรองนักศึกษาที่ GPA >= 3.0 ===
+  print("=== นักศึกษาที่ GPA >= 3.0 ===");
+  var honorStudents = students
+      .where((s) => (s["gpa"] as double) >= 3.0)
+      .toList();
+  for (var s in honorStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  // === map() — แปลงเป็น String รายงาน ===
+  print("\n=== รายงานนักศึกษา ===");
+  var report = students
+      .map((s) => "${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}")
+      .toList();
+  report.forEach(print);
+
+  // === sort() + reduce() ===
+  print("\n=== วิเคราะห์คะแนน ===");
+  List<double> gpas = students.map((s) => s["gpa"] as double).toList();
+  double maxGpa = gpas.reduce((a, b) => a > b ? a : b);
+  double minGpa = gpas.reduce((a, b) => a < b ? a : b);
+  double avgGpa = gpas.reduce((a, b) => a + b) / gpas.length;
+  print("GPA สูงสุด: $maxGpa");
+  print("GPA ต่ำสุด: $minGpa");
+  print("GPA เฉลี่ย: ${avgGpa.toStringAsFixed(2)}");
+
+  // === any() และ every() ===
+  bool anyFailing = students.any((s) => (s["gpa"] as double) < 2.0);
+  bool allPassing = students.every((s) => (s["gpa"] as double) >= 2.0);
+  print("มีนักศึกษาที่ GPA < 2.0: $anyFailing");
+  print("ทุกคน GPA >= 2.0: $allPassing");
+
+  // ทดลองเพิ่มเอง: กรองเฉพาะคณะวิศวกรรม
+  print("\n=== นักศึกษาคณะวิศวกรรม ===");
+  var engineeringStudents = students
+      .where((s) => s["faculty"] == "วิศวกรรม")
+      .toList();
+  for (var s in engineeringStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  // === 1. หานักศึกษาที่ GPA สูงสุดในคณะที่ระบุ ===
+  print("\n=== หาคนเก่งสุดในคณะ ===");
+  String topEngineer = findTopStudentByFaculty(students, "วิศวกรรม");
+  print("คนเก่งสุดคณะวิศวกรรม: $topEngineer");
+
+  String topScience = findTopStudentByFaculty(students, "วิทยาศาสตร์");
+  print("คนเก่งสุดคณะวิทยาศาสตร์: $topScience");
+
+  // === 2. จัดกลุ่มนักศึกษาตามคณะ ===
+  print("\n=== จัดกลุ่มตามคณะ ===");
+  Map<String, List> grouped = groupByFaculty(students);
+  grouped.forEach((faculty, list) {
+    print("$faculty:");
+    for (var s in list) {
+      print("  ${s["name"]}: ${s["gpa"]}");
+    }
+  });
+
+  // === 3. เรียง GPA จากสูงไปต่ำ แสดง 3 อันดับแรก ===
+  print("\n=== 3 อันดับ GPA สูงสุด ===");
+  List<Map<String, dynamic>> sortedStudents = List.from(students);
+  sortedStudents.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  for (int i = 0; i < 3; i++) {
+    print("${i + 1}. ${sortedStudents[i]["name"]}: ${sortedStudents[i]["gpa"]}");
+  }
+}
+
+// Function 1: หานักศึกษาที่ GPA สูงสุดในคณะที่ระบุ
+String findTopStudentByFaculty(List students, String faculty) {
+  var studentsInFaculty = students
+      .where((s) => s["faculty"] == faculty)
+      .toList();
+
+  var topStudent = studentsInFaculty[0];
+  for (var s in studentsInFaculty) {
+    if ((s["gpa"] as double) > (topStudent["gpa"] as double)) {
+      topStudent = s;
+    }
+  }
+  return topStudent["name"];
+}
+
+// Function 2: จัดกลุ่มนักศึกษาตามคณะ
+Map<String, List> groupByFaculty(List students) {
+  Map<String, List> grouped = {};
+
+  for (var s in students) {
+    String faculty = s["faculty"];
+    if (!grouped.containsKey(faculty)) {
+      grouped[faculty] = [];
+    }
+    grouped[faculty]!.add(s);
+  }
+
+  return grouped;
+}
 
 
 ```
@@ -918,6 +1094,221 @@ void main() {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+// ===================== BankAccount =====================
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  final List<String> _history = [];
+
+  BankAccount({
+    required this.ownerName,
+    double initial = 0,
+  }) : _balance = initial;
+
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+    _balance += amount;
+    _history.add(
+        "+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+    print("✅ ฝากเงินสำเร็จ");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+    if (amount > _balance) {
+      print("❌ ยอดเงินไม่เพียงพอ");
+      return false;
+    }
+
+    _balance -= amount;
+    _history.add(
+        "- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอนเงินสำเร็จ");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n===== $ownerName =====");
+    print("ยอดเงินคงเหลือ : ${_balance.toStringAsFixed(2)} บาท");
+
+    if (_history.isEmpty) {
+      print("ไม่มีรายการ");
+    } else {
+      for (var item in _history) {
+        print(item);
+      }
+    }
+  }
+
+  @override
+  String toString() =>
+      "BankAccount($ownerName, ${_balance.toStringAsFixed(2)} บาท)";
+}
+
+// ===================== CheckingAccount =====================
+class CheckingAccount extends BankAccount {
+  static const double overdraftLimit = 500;
+  static const double overdraftFee = 50;
+
+  CheckingAccount({
+    required String ownerName,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+
+    bool willOverdraft = amount > balance;
+    // รวมค่าธรรมเนียมเข้าไปในเงื่อนไขตรวจสอบวงเงิน เพื่อไม่ให้ยอดสุดท้ายเกิน -500 จริง ๆ
+    double projectedBalance =
+        balance - amount - (willOverdraft ? overdraftFee : 0);
+
+    if (projectedBalance < -overdraftLimit) {
+      print("❌ ถอนเกินวงเงิน Overdraft (สูงสุด ${overdraftLimit.toStringAsFixed(2)} บาท)");
+      return false;
+    }
+
+    if (willOverdraft) {
+      _balance -= amount;
+      _balance -= overdraftFee;
+      _history.add(
+          "- ถอน ${amount.toStringAsFixed(2)} บาท (Overdraft, ค่าธรรมเนียม ${overdraftFee.toStringAsFixed(2)} บาท) "
+          "(ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+      print("⚠️ ถอนเงินสำเร็จผ่าน Overdraft (หักค่าธรรมเนียม ${overdraftFee.toStringAsFixed(2)} บาท)");
+    } else {
+      _balance -= amount;
+      _history.add(
+          "- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ ${_balance.toStringAsFixed(2)})");
+      print("✅ ถอนเงินสำเร็จ");
+    }
+
+    return true;
+  }
+}
+
+// ===================== Vehicle =====================
+abstract class Vehicle {
+  double fuel = 0;
+
+  double get fuelEfficiency;
+
+  void refuel(double liters) {
+    if (liters <= 0) {
+      print("❌ จำนวนลิตรต้องมากกว่า 0");
+      return;
+    }
+    fuel += liters;
+    print("เติมน้ำมัน ${liters.toStringAsFixed(1)} ลิตร (มีทั้งหมด ${fuel.toStringAsFixed(2)} ลิตร)");
+  }
+
+  void drive(double km) {
+    double used = km / fuelEfficiency;
+
+    if (used > fuel) {
+      double maxKm = fuel * fuelEfficiency;
+      print("❌ น้ำมันไม่เพียงพอ ขับได้สูงสุด ${maxKm.toStringAsFixed(2)} กม.");
+      return;
+    }
+
+    fuel -= used;
+
+    print(
+        "ขับ ${km.toStringAsFixed(0)} กม. ใช้น้ำมัน ${used.toStringAsFixed(2)} ลิตร เหลือ ${fuel.toStringAsFixed(2)} ลิตร");
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15;
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8;
+}
+
+// ===================== Discountable =====================
+mixin Discountable {
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    if (percent <= 0 || percent > 100) {
+      print("❌ เปอร์เซ็นต์ส่วนลดต้องอยู่ระหว่าง 0-100");
+      return;
+    }
+    price -= price * percent / 100;
+  }
+}
+
+class Product with Discountable {
+  final String name;
+
+  @override
+  double price;
+
+  Product({
+    required this.name,
+    required this.price,
+  });
+
+  @override
+  String toString() => "$name ราคา ${price.toStringAsFixed(2)} บาท";
+}
+
+// ===================== Main =====================
+void main() {
+  print("========== CheckingAccount ==========");
+
+  var checking = CheckingAccount(
+    ownerName: "สมชาย",
+    initial: 1000,
+  );
+
+  checking.deposit(500);
+  checking.withdraw(1700); // overdraft: 1500-1700-50 = -250 (ยังไม่เกิน -500)
+  checking.withdraw(300);  // -250-300-50 = -600 < -500 -> ปฏิเสธ
+  checking.printStatement();
+
+  print("\n========== Vehicle ==========");
+
+  Car car = Car();
+  car.refuel(20);
+  car.drive(150);
+
+  Truck truck = Truck();
+  truck.refuel(50);
+  truck.drive(200);
+
+  print("\n========== Product ==========");
+
+  Product product = Product(
+    name: "Laptop",
+    price: 30000,
+  );
+
+  print(product);
+
+  product.applyDiscount(10);
+
+  print("หลังลดราคา: $product");
+}
 
 
 ```
@@ -1152,9 +1543,9 @@ void main() async {
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 3750 ms
+Parallel ใช้เวลา:   1038 ms
+ประหยัดเวลาได้:     2712 ms (72.32%)
 ```
 
 ---
@@ -1219,6 +1610,87 @@ void main() async {
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
 // บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+
+// ===================== 1. คำนวณภาษี =====================
+Future<double> calculateTax(double income) async {
+  print("  [Tax] กำลังคำนวณภาษีสำหรับรายได้ ${income.toStringAsFixed(2)} บาท...");
+  await Future.delayed(Duration(milliseconds: 500));
+
+  double rate;
+  if (income <= 150000) {
+    rate = 0.0;
+  } else if (income <= 300000) {
+    rate = 0.05;
+  } else if (income <= 500000) {
+    rate = 0.10;
+  } else {
+    rate = 0.20;
+  }
+
+  double tax = income * rate;
+  print("  [Tax] รายได้ ${income.toStringAsFixed(2)} บาท -> อัตรา ${(rate * 100).toStringAsFixed(0)}% -> ภาษี ${tax.toStringAsFixed(2)} บาท");
+  return tax;
+}
+
+// สมมติฟังก์ชันดึงรายได้ผู้ใช้ (จำลอง)
+Future<double> fetchUserIncome(int userId) async {
+  await Future.delayed(Duration(milliseconds: 300));
+  // ค่าตัวอย่าง แต่ละคนรายได้ไม่เท่ากัน
+  Map<int, double> incomes = {
+    1: 120000,
+    2: 280000,
+    3: 650000,
+  };
+  return incomes[userId] ?? 0;
+}
+
+// ===================== 3. Stream Chat Message =====================
+Stream<String> chatMessageStream() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1));
+    yield "ข้อความที่ $i: สวัสดีครับ 👋 (ส่งเมื่อวินาทีที่ $i)";
+  }
+}
+
+// ===================== 2. Main =====================
+void main() async {
+  print("=== คำนวณภาษีของผู้ใช้ 3 คน (พร้อมกัน) ===\n");
+
+  var stopwatch = Stopwatch()..start();
+
+  // ดึงรายได้ของผู้ใช้ 3 คนพร้อมกัน
+  var incomes = await Future.wait([
+    fetchUserIncome(1),
+    fetchUserIncome(2),
+    fetchUserIncome(3),
+  ]);
+
+  // คำนวณภาษีของแต่ละคนพร้อมกัน
+  var taxes = await Future.wait([
+    calculateTax(incomes[0]),
+    calculateTax(incomes[1]),
+    calculateTax(incomes[2]),
+  ]);
+
+  stopwatch.stop();
+
+  print("\n=== สรุปผล ===");
+  for (int i = 0; i < incomes.length; i++) {
+    print("ผู้ใช้ ${i + 1}: รายได้ ${incomes[i].toStringAsFixed(2)} บาท -> ภาษี ${taxes[i].toStringAsFixed(2)} บาท");
+  }
+
+  double totalTax = taxes.reduce((a, b) => a + b);
+  print("ภาษีรวมทั้งหมด: ${totalTax.toStringAsFixed(2)} บาท");
+  print("เวลาที่ใช้ทั้งหมด: ${stopwatch.elapsedMilliseconds}ms\n");
+
+  // ===== ทดสอบ Stream Chat =====
+  print("=== Chat Message Stream ===");
+  await for (String message in chatMessageStream()) {
+    print(message);
+  }
+  print("\n💬 การสนทนาสิ้นสุดแล้ว");
+}
 
 
 ```
@@ -1229,27 +1701,46 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
+  final (Run-time constant): กำหนดค่าได้ครั้งเดียว แต่ค่าสามารถคำนวณหรือดึงมาตอนโปรแกรมทำงานได้ (เช่น เวลา     ปัจจุบัน หรือค่าจาก API)
 
+  const (Compile-time constant): ต้องรู้ค่าที่แน่นอนตั้งแต่ตอนเขียนโค้ด/คอมไพล์ ห้ามเปลี่ยนเด็ดขาด และประหยัดหน่วย   ความจำมากกว่า
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
+Positional Parameters: ส่งค่าตามลำดับตำแหน่ง เช่น void createUser(String name, int age) -> createUser('Alice', 25);
+
+Named Parameters: ส่งค่าโดยระบุชื่อตัวแปร (อยู่ใน {}) ไม่สนใจลำดับ เช่น void createUser({String? name, int? age}) -> createUser(age: 25, name: 'Alice');
 
 
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
+Abstract Class (โครงสร้างหลัก): เป็นคลาสฐานที่สร้าง Object ตรงๆ ไม่ได้ มีไว้ให้คลาสอื่นสืบทอด (extends) เพื่อบังคับให้ทำตามโครงสร้างเดียวกัน (สร้างความสัมพันธ์แบบ Is-A เช่น Dog is an Animal)
+
+Mixin (ความสามารถเสริม): เป็นการแชร์พฤติกรรมหรือฟังก์ชันการทำงาน โดยคลาสอื่นสามารถดึงไปใช้เพิ่มได้ (with) โดยไม่ต้องสืบทอดเป็นคลาสลูก (สร้างความสัมพันธ์แบบ Has-A หรือ Can-Do เช่น Dog can Swim)
 
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
+Sequential ใช้เวลาประมาณ: 3750 ms
+
+Parallel ใช้เวลาประมาณ: 1038 ms
+
+ทำไม Parallel เร็วกว่า?
+เพราะ Parallel ทำงานหลายๆ งานพร้อมกัน (ขนานกันไป) ส่วน Sequential ต้องรอให้งานแรกเสร็จก่อน ถึงจะเริ่มงานถัดไปได้
+
+กรณีที่ต้องใช้ Sequential:
+เมื่องานถัดไปจำเป็นต้องใช้ผลลัพธ์จากงานก่อนหน้า เช่น ต้องโหลดข้อมูล User ID จาก API แรกให้เสร็จก่อน ถึงจะเอา ID นั้นไปดึงข้อมูล Profile ใน API ที่สองได้
 
 
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
+Future: ส่งข้อมูลกลับมาแค่ครั้งเดียวแล้วจบการทำงาน (Single Value / One-time Asynchronous)
 
+Stream: ส่งข้อมูลกลับมาต่อเนื่องเป็นสายข้อมูลเรื่อยๆ เมื่อมีการเปลี่ยนแปลง (Multiple Values / Continuous Data)
 
 ```
 ---
