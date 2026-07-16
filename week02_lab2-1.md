@@ -1512,7 +1512,57 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+
+// ข้อ 1
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+
+  if (income <= 150000) {
+    return 0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+// ข้อ 3
+Stream<String> chatMessage() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1));
+    yield "ข้อความที่ $i";
+  }
+}
+
+void main() async {
+  // ข้อ 2
+  List<double> incomes = [120000, 250000, 600000];
+
+  var taxes = await Future.wait(
+    incomes.map((income) => calculateTax(income)),
+  );
+
+  double totalTax = 0;
+
+  print("=== ภาษีของผู้ใช้ ===");
+  for (int i = 0; i < incomes.length; i++) {
+    print("ผู้ใช้ ${i + 1}");
+    print("รายได้: ${incomes[i]} บาท");
+    print("ภาษี: ${taxes[i]} บาท");
+    totalTax += taxes[i];
+  }
+
+  print("ภาษีรวมทั้งหมด: $totalTax บาท");
+
+  // ข้อ 3
+  print("\n=== Chat Message ===");
+  await for (String message in chatMessage()) {
+    print(message);
+  }
+}
 
 
 ```
