@@ -253,6 +253,7 @@ void main() {
 ```
 
 **ขั้นตอนที่ 7** กด Run และบันทึกผลลัพธ์ทั้งหมด
+<img width="231" height="399" alt="image" src="https://github.com/user-attachments/assets/5a529b0d-952a-48ec-b33a-4a0f79c9d6ee" />
 
 ---
 
@@ -273,8 +274,23 @@ void main() {
 ```
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// // 1. เพิ่มรายวิชา "Database" ที่มีคะแนน 88
+  courses.add("Database");
+  courseScores["Database"] = 88;
+// 2. หาวิชาที่มีคะแนนสูงสุด
+  final highestEntry = courseScores.entries.reduce((a, b) => a.value > b.value ? a : b);
+  print("\nวิชาที่ได้คะแนนสูงสุด: ${highestEntry.key} (${highestEntry.value} คะแนน)");
 
+  // 3. นับจำนวนวิชาที่ได้คะแนน >= 90
+  int countAbove90 = courseScores.values.where((score) => score >= 90).length;
+  print("จำนวนวิชาที่ได้ >= 90: $countAbove90 วิชา");
+
+  // 4. สร้าง Set<String> เก็บวิชาที่ได้คะแนน >= 80
+  Set<String> passedCourses = courseScores.entries
+      .where((entry) => entry.value >= 80)
+      .map((entry) => entry.key)
+      .toSet();
+  print("วิชาที่ผ่าน: $passedCourses");
 
 ```
 ---
@@ -570,8 +586,33 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// /// 1. ฟังก์ชันค้นหานักศึกษาที่มี GPA สูงสุดในคณะที่ระบุ
+String? findTopStudentByFaculty(List<Student> students, String faculty) {
+  var filtered = students.where((s) => s.faculty == faculty).toList();
+  if (filtered.isEmpty) return null;
 
+  filtered.sort((a, b) => b.gpa.compareTo(a.gpa));
+  return filtered.first.name;
+}
+
+/// 2. ฟังก์ชันจัดกลุ่มนักศึกษาตามคณะ
+Map<String, List<Student>> groupByFaculty(List<Student> students) {
+  Map<String, List<Student>> grouped = {};
+  for (var student in students) {
+    grouped.putIfAbsent(student.faculty, () => []).add(student);
+  }
+  return grouped;
+}
+ 3. ฟังก์ชันคำนวณและแสดงค่าเฉลี่ย GPA ของแต่ละคณะ
+void printAverageGpaByFaculty(List<Student> students) {
+  print("\n=== ค่าเฉลี่ย GPA แบ่งตามคณะ ===");
+  final grouped = groupByFaculty(students);
+  
+  grouped.forEach((faculty, list) {
+    final avg = list.map((s) => s.gpa).average;
+    print("คณะ $faculty: ${avg.toStringAsFixed(2)}");
+  });
+}
 
 ```
 ---
@@ -917,7 +958,104 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// /// 1. BANKING SYSTEM EXTENSION
+/// This system manages bank accounts with support for basic transactions
+/// and an specialized overdraft-enabled CheckingAccount.
+class BankAccount {
+  final String ownerName;
+  int _balanceInCents;
+  final List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+      : _balanceInCents = (initial * 100).round();
+
+  double get balance => _balanceInCents / 100;
+  int get balanceInCents => _balanceInCents;
+  set balanceInCents(int value) => _balanceInCents = value;
+
+  List<String> get history => List.unmodifiable(_history);
+
+  bool deposit(double amount) {
+    if (amount <= 0) return false;
+    _balanceInCents += (amount * 100).round();
+    _history.add("+ Deposit ${amount.toStringAsFixed(2)} | Balance: ${balance.toStringAsFixed(2)}");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || (amount * 100).round() > _balanceInCents) return false;
+    _balanceInCents -= (amount * 100).round();
+    _history.add("- Withdraw ${amount.toStringAsFixed(2)} | Balance: ${balance.toStringAsFixed(2)}");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n--- Account Statement: $ownerName ---");
+    print("Balance: ${balance.toStringAsFixed(2)}");
+    for (var entry in _history) {
+      print("  $entry");
+    }
+  }
+}
+/// 2. VEHICLE SYSTEM
+/// Abstract base class for vehicle types.
+abstract class Vehicle {
+  double fuel = 0;
+  double get fuelEfficiency; // km/liter
+
+  void refuel(double liters) => fuel += liters;
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (fuel >= fuelNeeded) {
+      fuel -= fuelNeeded;
+      print("Drove $km km. Remaining fuel: ${fuel.toStringAsFixed(2)} L");
+    } else {
+      print("Not enough fuel to drive $km km.");
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  final double fuelEfficiency = 15.0; 
+}
+
+class Truck extends Vehicle {
+  @override
+  final double fuelEfficiency = 5.0; 
+}
+/// 3. MIXIN DISCOUNTABLE
+/// Provides discount calculation logic to classes.
+mixin Discountable {
+  double applyDiscount(double price, double percent) {
+    return price * (1 - (percent / 100));
+  }
+}
+
+class Product with Discountable {
+  String name;
+  double price;
+  Product(this.name, this.price);
+}
+
+void main() {
+  try {
+    // Logic for Banking System
+    print("=== CheckingAccount Demo ===");
+    var checking = CheckingAccount(ownerName: "Alice", initial: 100);
+    checking.withdraw(400); 
+    checking.printStatement();
+
+    // Logic for Vehicle System
+    print("\n=== Vehicle Demo ===");
+    var myCar = Car();
+    myCar.refuel(10);
+    myCar.drive(100);
+    var myTruck = Truck();
+    myTruck.refuel(10);
+    myTruck.drive(20);
+
 
 
 ```
@@ -1152,9 +1290,9 @@ void main() async {
 
 ```
 บันทึกผลการทดลอง:
-Sequential ใช้เวลา: _______ ms
-Parallel ใช้เวลา:   _______ ms
-ประหยัดเวลาได้:     _______ ms (_______ %)
+Sequential ใช้เวลา: 2860 ms
+Parallel ใช้เวลา:   1001 ms
+ประหยัดเวลาได้:     1859 ms (65.00 %)
 ```
 
 ---
@@ -1218,7 +1356,68 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+// import 'dart:async';
+import 'dart:io';
+
+/// Calculates tax based on progressive tax brackets with a 0.5s delay.
+Future<double> calculateTax(double income) async {
+  await Future.delayed(const Duration(milliseconds: 500));
+  
+  if (income <= 150000) {
+    return 0.0;
+  } else if (income <= 300000) {
+    return (income - 150000) * 0.05;
+  } else if (income <= 500000) {
+    return (150000 * 0.05) + ((income - 300000) * 0.10);
+  } else {
+    return (150000 * 0.05) + (200000 * 0.10) + ((income - 500000) * 0.20);
+  }
+}
+
+/// Simulates a chat message stream emitting 5 messages at 1-second intervals.
+Stream<String> simulateChatMessages() async* {
+  final messages = [
+    "Hello there!",
+    "How are you doing today?",
+    "Learning Dart is fun.",
+    "Async programming is powerful.",
+    "Goodbye for now!"
+  ];
+
+  for (final message in messages) {
+    await Future.delayed(const Duration(seconds: 1));
+    yield message;
+  }
+}
+
+void main() async {
+  // 1. Task: Process 3 users' taxes in parallel
+  print("=== Tax Calculation (Future.wait) ===");
+  final incomes = [100000.0, 250000.0, 600000.0];
+  
+  final taxFutures = incomes.map((income) => calculateTax(income));
+  
+  try {
+    final results = await Future.wait(taxFutures);
+    
+    double totalTax = 0.0;
+    for (int i = 0; i < results.length; i++) {
+      print("Income ${incomes[i].toInt()} -> Tax: ${results[i].toStringAsFixed(2)}");
+      totalTax += results[i];
+    }
+    print("Total Tax for all users: ${totalTax.toStringAsFixed(2)}\n");
+  } catch (e) {
+    print("Error calculating tax: $e");
+  }
+
+  // 2. Task: Display chat messages via stream
+  print("=== Chat Simulation (Stream) ===");
+  await for (final message in simulateChatMessages()) {
+    print("Message received: $message");
+  }
+  
+  print("\nSimulation complete.");
+}
 
 
 ```
@@ -1229,27 +1428,33 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
-
+final = กำหนดค่าได้ครั้งเดียว แต่รู้ค่าได้ตอนรันไทม์ เช่น final now = DateTime.now();
+const = ค่าคงที่ต้องรู้ตั้งแต่ compile-time เช่น const pi = 3.14;
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
-
+Positional: ส่งค่าตามลำดับ เช่น greet("Tom", 20) — ใช้เมื่อพารามิเตอร์น้อยและความหมายชัดเจน
+Named: ระบุชื่อ เช่น greet(name: "Tom", age: 20) — ใช้เมื่อพารามิเตอร์เยอะ/มี optional เยอะ อ่านง่าย ป้องกันสลับลำดับผิด (Flutter widget ใช้แบบนี้เป็นหลัก)
 
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
-
+Abstract Class: กำหนด "แม่แบบ" ให้ subclass สืบทอด (is-a relationship) เหมาะกับกลุ่มคลาสที่มีธรรมชาติร่วมกันชัดเจน เช่น Animal → Dog, Cat
+Mixin: เพิ่มความสามารถ (behavior) ให้คลาสที่ไม่เกี่ยวข้องกันได้หลายตัว โดยไม่ใช้การสืบทอดตรงๆ เช่น Flyable, Swimmable ที่ผสมใส่คลาสต่างๆ ได้
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
-
+Sequential ใช้เวลารวมของทุก task บวกกัน (เช่น ~3000ms ถ้ามี 3 task ละ 1000ms)
+Parallel ใช้เวลาประมาณเท่ากับ task ที่นานที่สุด (เช่น ~1000ms) เพราะรันพร้อมกันด้วย Future.wait()
+ต้องใช้ Sequential เมื่อ task ต่อมาต้องรอผลลัพธ์จาก task ก่อนหน้า (มี dependency กัน) เช่น login แล้วค่อยดึงข้อมูล user
 
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
-
+Future: ค่าที่ได้ครั้งเดียวในอนาคต เช่น เรียก API ดึงข้อมูลโปรไฟล์ผู้ใช้ครั้งเดียว
+Stream: ค่าที่ทยอยส่งมาต่อเนื่องหลายครั้ง เช่น ข้อความแชทแบบ real-time หรือตำแหน่ง GPS ที่อัปเดตตลอดเวลา
 
 ```
 ---
