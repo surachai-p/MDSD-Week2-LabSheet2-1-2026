@@ -1082,7 +1082,136 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+class BankAccount {
+  final String ownerName;
+  double balance;
+  List<String> history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+      : balance = initial;
+
+  bool deposit(double amount) {
+    if (amount <= 0) return false;
+    balance += amount;
+    history.add("+ ฝาก ${amount.toStringAsFixed(2)} บาท");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > balance) return false;
+    balance -= amount;
+    history.add("- ถอน ${amount.toStringAsFixed(2)} บาท");
+    return true;
+  }
+
+  void printStatement() {
+    print("=== บัญชีของ: $ownerName ===");
+    print("ยอดเงินคงเหลือ: ${balance.toStringAsFixed(2)} บาท");
+    print("ประวัติรายการ:");
+    history.forEach((h) => print("  $h"));
+  }
+}
+
+class CheckingAccount extends BankAccount {
+  CheckingAccount({
+    required String ownerName,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) return false;
+
+    if (amount > balance + 500) {
+      print("ถอนเกินวงเงิน Overdraft (สูงสุด 500 บาท)");
+      return false;
+    }
+
+    balance -= amount;
+    history.add("- ถอน ${amount.toStringAsFixed(2)} บาท");
+
+    if (balance < 0) {
+      balance -= 50;
+      history.add("- ค่าธรรมเนียม Overdraft 50.00 บาท");
+      print("ยอดบัญชีติดลบ คิดค่าธรรมเนียม 50 บาท");
+    }
+    return true;
+  }
+}
+
+abstract class Vehicle {
+  double _fuel = 0;
+
+  double get fuelEfficiency;
+
+  void refuel(double liters) {
+    if (liters > 0) {
+      _fuel += liters;
+      print("เติมน้ำมัน $liters ลิตร (มีน้ำมันรวม: ${_fuel.toStringAsFixed(2)} ลิตร)");
+    }
+  }
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (_fuel >= fuelNeeded) {
+      _fuel -= fuelNeeded;
+      print("วิ่งไป $km กม. ใช้น้ำมัน ${fuelNeeded.toStringAsFixed(2)} ลิตร (เหลือ ${_fuel.toStringAsFixed(2)} ลิตร)");
+    } else {
+      print("น้ำมันไม่พอสำหรับการวิ่ง $km กม.");
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15;
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8;
+}
+
+mixin Discountable {
+  double get price;
+  set price(double value);
+
+  void applyDiscount(double percent) {
+    double discountAmount = price * (percent / 100);
+    price -= discountAmount;
+    print("ใช้ส่วนลด ${percent.toStringAsFixed(0)}% (ลดไป ${discountAmount.toStringAsFixed(2)} บาท) ราคาใหม่คือ: ${price.toStringAsFixed(2)} บาท");
+  }
+}
+
+class Product with Discountable {
+  String name;
+  @override
+  double price;
+
+  Product(this.name, this.price);
+}
+
+void main() {
+  var checking = CheckingAccount(ownerName: "สมชาย", initial: 1000);
+  checking.withdraw(1200);
+  checking.printStatement();
+
+  print("");
+
+  Car car = Car();
+  car.refuel(10);
+  car.drive(60);
+
+  Truck truck = Truck();
+  truck.refuel(10);
+  truck.drive(60);
+
+  print("");
+
+  Product p = Product("Notebook", 30000);
+  print("สินค้า: ${p.name} ราคาปกติ: ${p.price.toStringAsFixed(0)} บาท");
+  p.applyDiscount(10);
+}
 
 
 ```
