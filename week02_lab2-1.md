@@ -737,6 +737,8 @@ void main() {
 
 
 ```
+<img width="1915" height="816" alt="image" src="https://github.com/user-attachments/assets/215ba996-2669-4d38-afd8-0398cce53c39" />
+
 ---
 
 ## ส่วนที่ 3 — ทฤษฎีและการทดลอง: OOP
