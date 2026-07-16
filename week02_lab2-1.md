@@ -1093,8 +1093,211 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
 
+class BankAccount {
+  final String ownerName;
+  double _balance;
+  List<String> _history = [];
+
+  BankAccount({required this.ownerName, double initial = 0})
+      : _balance = initial;
+
+  double get balance => _balance;
+  List<String> get history => List.unmodifiable(_history);
+
+  // เมธอดสำหรับให้ Subclass ช่วยอัปเดตยอดเงินและประวัติได้อย่างปลอดภัย
+  void updateBalance(double amount, String description) {
+    _balance += amount;
+    _history.add(description);
+  }
+
+  bool deposit(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    _balance += amount;
+    _history.add("+ ฝาก ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ฝาก ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    if (amount > _balance) {
+      print("❌ ยอดเงินไม่เพียงพอ (มี ${_balance.toStringAsFixed(2)} บาท)");
+      return false;
+    }
+    _balance -= amount;
+    _history.add("- ถอน ${amount.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${_balance.toStringAsFixed(2)})");
+    print("✅ ถอน ${amount.toStringAsFixed(2)} บาท สำเร็จ");
+    return true;
+  }
+
+  void printStatement() {
+    print("\n=== สรุปบัญชี: $ownerName ===");
+    print("ยอดปัจจุบัน: ${_balance.toStringAsFixed(2)} บาท");
+    print("ประวัติรายการ:");
+    if (_history.isEmpty) {
+      print("  (ยังไม่มีรายการ)");
+    } else {
+      _history.forEach((h) => print("  $h"));
+    }
+  }
+
+  @override
+  String toString() => "BankAccount($ownerName, ยอด: ${_balance.toStringAsFixed(2)})";
+}
+
+// คลาสบัญชีออมทรัพย์ (จากขั้นตอนที่ 2)
+class SavingsAccount extends BankAccount {
+  final double interestRate;
+
+  SavingsAccount({
+    required String ownerName,
+    required this.interestRate,
+    double initial = 0,
+  }) : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (balance - amount < 500) {
+      print("❌ บัญชีออมทรัพย์ต้องมียอดขั้นต่ำ 500 บาท");
+      return false;
+    }
+    return super.withdraw(amount);
+  }
+
+  void applyMonthlyInterest() {
+    double interest = balance * interestRate / 12;
+    updateBalance(interest, "+ ดอกเบี้ยรายเดือน ${interest.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${(balance + interest).toStringAsFixed(2)})");
+    print("✅ ดอกเบี้ยเดือนนี้: ${interest.toStringAsFixed(2)} บาท");
+  }
+}
+
+// 🔥 โจทย์ 3.1: คลาส CheckingAccount (แก้ไข Logic Bug เรื่องค่าธรรมเนียมแล้ว)
+class CheckingAccount extends BankAccount {
+  final double overdraftLimit = 500.0;
+  final double fee = 50.0;
+
+  CheckingAccount({required String ownerName, double initial = 0})
+      : super(ownerName: ownerName, initial: initial);
+
+  @override
+  bool withdraw(double amount) {
+    if (amount <= 0) {
+      print("❌ จำนวนเงินต้องมากกว่า 0");
+      return false;
+    }
+    
+    // 1. คิดค่าธรรมเนียม 50 บาท เฉพาะเมื่อยอดเงินในบัญชีปัจจุบันไม่พอถอน (เกิด Overdraft)
+    double requiredFee = (balance < amount) ? fee : 0.0;
+    
+    // 2. ตรวจสอบว่าถอนรวมค่าธรรมเนียมแล้วจะเกินวงเงินติดลบ 500 บาทหรือไม่
+    if (balance - amount - requiredFee < -overdraftLimit) {
+      print("❌ เกินวงเงินถอนเกินบัญชี (Overdraft Limit 500 บาท)");
+      return false;
+    }
+
+    // 3. กรณีเกิด Overdraft (เงินไม่พอถอน)
+    if (balance < amount) {
+      double totalDeduction = amount + requiredFee;
+      double newBalance = balance - totalDeduction;
+      updateBalance(-totalDeduction, "- ถอน (Overdraft) ${amount.toStringAsFixed(2)} บาท + ค่าธรรมเนียม ${fee.toStringAsFixed(2)} บาท (ยอดคงเหลือ: ${newBalance.toStringAsFixed(2)})");
+      print("⚠️ ถอนเงินสำเร็จ (ใช้ Overdraft) หักค่าธรรมเนียม $fee บาท");
+      return true;
+    }
+
+    // 4. กรณีปกติ ยอดเงินเดิมมีเพียงพอ
+    return super.withdraw(amount);
+  }
+}
+
+
+abstract class Vehicle {
+  double _fuelLeft = 0;
+
+  // Abstract getter ที่บังคับให้ subclass ระบุ
+  double get fuelEfficiency;
+  double get fuelLeft => _fuelLeft;
+
+  void refuel(double liters) {
+    if (liters > 0) {
+      _fuelLeft += liters;
+      print("⛽ เติมน้ำมัน +$liters ลิตร (น้ำมันคงเหลือ: ${_fuelLeft.toStringAsFixed(2)} ลิตร)");
+    }
+  }
+
+  void drive(double km) {
+    double fuelNeeded = km / fuelEfficiency;
+    if (fuelNeeded > _fuelLeft) {
+      print("❌ ไม่สามารถขับไประยะทาง $km กม. ได้ เนื่องจากน้ำมันไม่พอ (ต้องการ ${fuelNeeded.toStringAsFixed(2)} ลิตร แต่มี ${_fuelLeft.toStringAsFixed(2)} ลิตร)");
+    } else {
+      _fuelLeft -= fuelNeeded;
+      print("🚗 ขับเคลื่อนไประยะทาง $km กม. (ใช้น้ำมันไป ${fuelNeeded.toStringAsFixed(2)} ลิตร, คงเหลือ: ${_fuelLeft.toStringAsFixed(2)} ลิตร)");
+    }
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  double get fuelEfficiency => 15.0; // รถยนต์ประหยัดน้ำมัน 15 กม./ลิตร
+}
+
+class Truck extends Vehicle {
+  @override
+  double get fuelEfficiency => 8.0;  // รถบรรทุกกินน้ำมัน 8 กม./ลิตร
+}
+
+
+mixin Discountable {
+  double applyDiscount(double price, double percent) {
+    double discount = price * (percent / 100);
+    return price - discount;
+  }
+}
+
+class Product with Discountable {
+  String name;
+  double price;
+
+  Product({required this.name, required this.price});
+
+  void showPromotion(double percent) {
+    double finalPrice = applyDiscount(price, percent);
+    print("🏷️ สินค้า: $name | ราคาปกติ: $price บาท | ลด $percent% เหลือเพียง: $finalPrice บาท");
+  }
+}
+
+
+void main() {
+  print("=== 📌 ทดสอบโจทย์ 3.1: CheckingAccount ===");
+  var checking = CheckingAccount(ownerName: "สมศักดิ์", initial: 1000);
+  checking.deposit(200);   // ยอดเป็น 1200
+  checking.withdraw(1100); // ยอดเหลือ 100 (ถอนปกติ ไม่เสียค่าธรรมเนียม)
+  checking.withdraw(300);  // ยอดเหลือ 100 ถอน 300 -> เงินไม่พอ เกิด Overdraft ครั้งแรก (ติดลบ -200 + โดน fee 50 = ยอดกลายเป็น -250) ผ่าน!
+  checking.withdraw(50);   // ยอดเหลือ -250 ถอนอีก 50 -> ยอดเหลือ -300 (รอบนี้ไม่เสีย fee ซ้ำซ้อนเพราะถอนเงินได้ตามลิมิต) ผ่าน!
+  checking.withdraw(300);  // ยอดเหลือ -300 ถอนอีก 300 จะกลายเป็น -600 ทะลุลิมิต 500 -> ต้องถูกปฏิเสธ
+  checking.printStatement();
+
+  print("\n=== 📌 ทดสอบโจทย์ 3.2: Vehicle (Abstract Class) ===");
+  print("[ทดสอบคลาส Car (15 กม./ลิตร)]");
+  Vehicle myCar = Car();
+  myCar.refuel(20);
+  myCar.drive(150); // ใช้น้ำมันไป 10 ลิตร ผ่าน
+
+  print("\n[ทดสอบคลาส Truck (8 กม./ลิตร)]");
+  Vehicle myTruck = Truck();
+  myTruck.refuel(20);
+  myTruck.drive(150); // ต้องใช้ 18.75 ลิตร ผ่านชิลๆ แต่ถ้าขับต่ออีกรอบจะเริ่มหมด
+
+  print("\n=== 📌 ทดสอบโจทย์ 3.3: Mixin (Discountable) ===");
+  var product = Product(name: "iPad Air", price: 25000);
+  product.showPromotion(10); // ลดราคา 10%
+}
 
 ```
 ---
