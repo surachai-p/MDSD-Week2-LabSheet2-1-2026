@@ -1597,7 +1597,97 @@ void main() async {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+import 'dart:async';
+
+Stream<double> simulateStockPrice(String symbol) async* {
+  double price = 100.0;
+  int ticks = 0;
+
+  while (ticks < 5) {
+    await Future.delayed(Duration(milliseconds: 500));
+
+    double change = (ticks % 2 == 0) ? 2.5 : -1.5;
+    price += change;
+    ticks++;
+
+    yield price; // ส่งค่าออกทาง Stream
+  }
+}
+
+
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500)); // จำลองดีเลย์ 0.5 วินาที
+  
+  if (income <= 150000) {
+    return 0.0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+Stream<String> chatMessageStream() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1)); // ดีเลย์ 1 วินาที
+    yield "💬 ข้อความที่ $i: สวัสดีครับครูสราญภัทร!"; // ส่งข้อความออกทาง Stream
+  }
+}
+
+
+void main() async {
+  print("=== ราคาหุ้น (Stream) ===");
+  print("Symbol: DART\n");
+
+  double? lastPrice;
+  await for (double price in simulateStockPrice("DART")) {
+    String direction = "";
+    if (lastPrice != null) {
+      direction = price > lastPrice! ? "📈 ขึ้น" : "📉 ลง";
+    }
+    print("ราคา: ${price.toStringAsFixed(2)} บาท  $direction");
+    lastPrice = price;
+  }
+  print("\nสิ้นสุดการแสดงราคา");
+  print("----------------------------------------");
+
+  print("\n🎯 === ผลรวมภาษีและการคำนวณแบบ Parallel ===");
+  
+  // จำลองรายได้ของผู้ใช้ 3 คน
+  List<double> userIncomes = [120000, 250000, 600000];
+  
+  var stopwatch = Stopwatch()..start();
+
+  List<double> taxes = await Future.wait([
+    calculateTax(userIncomes[0]),
+    calculateTax(userIncomes[1]),
+    calculateTax(userIncomes[2]),
+  ]);
+
+  stopwatch.stop();
+
+
+  for (int i = 0; i < userIncomes.length; i++) {
+    print("ผู้ใช้คนที่ ${i + 1} รายได้: ${userIncomes[i].toStringAsFixed(2)} บาท | ภาษีที่ต้องจ่าย: ${taxes[i].toStringAsFixed(2)} บาท");
+  }
+
+ 
+  double totalTax = taxes.reduce((a, b) => a + b);
+  print("\n💰 ผลรวมภาษีทั้งหมดที่ต้องจ่าย: ${totalTax.toStringAsFixed(2)} บาท");
+  print("⏱️ เวลาที่ใช้ในการประมวลผลภาษี: ${stopwatch.elapsedMilliseconds}ms");
+  print("----------------------------------------");
+
+  print("\n🎯 === จำลองระบบแชท (Stream) ===");
+  print("เริ่มรับข้อความแชท...");
+
+  await for (String msg in chatMessageStream()) {
+    print(msg); // แสดงข้อความที่ได้รับทีละข้อความ ทุกๆ 1 วินาที
+  }
+
+  print("\nสิ้นสุดการรับข้อความแชท ✅");
+}
 
 
 ```
