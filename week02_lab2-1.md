@@ -636,7 +636,117 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย",  "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์","gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ",  "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === โค้ดจากการทดลอง 2.2 เดิม ===
+  print("=== นักศึกษาที่ GPA >= 3.0 ===");
+  var honorStudents = students.where((s) => (s["gpa"] as double) >= 3.0).toList();
+  for (var s in honorStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  print("\n=== รายงานนักศึกษา ===");
+  var report = students.map((s) => "${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}").toList();
+  report.forEach(print);
+
+  print("\n=== วิเคราะห์คะแนน ===");
+  List<double> gpas = students.map((s) => s["gpa"] as double).toList();
+  double maxGpa = gpas.reduce((a, b) => a > b ? a : b);
+  double minGpa = gpas.reduce((a, b) => a < b ? a : b);
+  double avgGpa = gpas.reduce((a, b) => a + b) / gpas.length;
+  print("GPA สูงสุด: $maxGpa");
+  print("GPA ต่ำสุด: $minGpa");
+  print("GPA เฉลี่ย: ${avgGpa.toStringAsFixed(2)}");
+
+  bool anyFailing = students.any((s) => (s["gpa"] as double) < 2.0);
+  bool allPassing = students.every((s) => (s["gpa"] as double) >= 2.0);
+  print("มีนักศึกษาที่ GPA < 2.0: $anyFailing");
+  print("ทุกคน GPA >= 2.0: $allPassing");
+
+  // === ขั้นตอนที่ 3: กรองเฉพาะคณะวิศวกรรม ===
+  print("\n=== นักศึกษาคณะวิศวกรรม ===");
+  var engineeringStudents = students.where((s) => s["faculty"] == "วิศวกรรม").toList();
+  for (var s in engineeringStudents) {
+    print("  ${s["name"]}: ${s["gpa"]}");
+  }
+
+  // ==========================================
+  // 🔥 เฉลยโจทย์ฝึกทำ 2 — เขียน Function ด้วยตนเอง
+  // ==========================================
+  print("\n🎯 === ผลลัพธ์โจทย์ฝึกทำ 2 ===");
+
+  // 1. ทดสอบ findTopStudentByFaculty
+  String targetFaculty = "วิศวกรรม";
+  String topStudent = findTopStudentByFaculty(students, targetFaculty);
+  print("1. นักศึกษาที่ GPA สูงสุดในคณะ $targetFaculty คือ: $topStudent");
+
+  // 2. ทดสอบ groupByFaculty
+  print("\n2. จัดกลุ่มนักศึกษาตามคณะ:");
+  Map<String, List<String>> grouped = groupByFaculty(students);
+  grouped.forEach((faculty, names) {
+    print("  คณะ $faculty: $names");
+  });
+
+  // 3. ใช้ sort() เรียงลำดับ GPA จากสูงไปต่ำ แล้วพิมพ์ Top 3
+  print("\n3. นักศึกษาที่มี GPA สูงสุด 3 อันดับแรก:");
+  
+  // ทำการ copy list ออกมาก่อนเพื่อไม่ให้กระทบกับข้อมูลต้นฉบับ
+  List<Map<String, dynamic>> sortedStudents = List.from(students);
+  
+  // เรียงจากมากไปน้อย: เปรียบเทียบ b กับ a
+  sortedStudents.sort((a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  // ดึงเฉพาะ 3 อันดับแรกมาแสดงผล (ใช้ take(3))
+  var top3 = sortedStudents.take(3);
+  int rank = 1;
+  for (var s in top3) {
+    print("  อันดับที่ $rank: ${s["name"]} (คณะ: ${s["faculty"]}) GPA: ${s["gpa"]}");
+    rank++;
+  }
+}
+
+// ==========================================
+// 🛠 ฟังก์ชันสำหรับโจทย์ฝึกทำ 2
+// ==========================================
+
+// ข้อที่ 1: หาชื่อนักศึกษาที่ GPA สูงสุดในคณะที่ระบุ
+String findTopStudentByFaculty(List<Map<String, dynamic>> students, String faculty) {
+  // กรองเอาเฉพาะคณะที่ต้องการ
+  var facultyMembers = students.where((s) => s["faculty"] == faculty).toList();
+  
+  if (facultyMembers.isEmpty) return "ไม่พบนักศึกษาในคณะนี้";
+
+  // ใช้ reduce เพื่อหาตัวที่มี GPA สูงสุด
+  var topStudent = facultyMembers.reduce((a, b) => (a["gpa"] as double) > (b["gpa"] as double) ? a : b);
+  return "${topStudent["name"]} (${topStudent["gpa"]})";
+}
+
+// ข้อที่ 2: จัดกลุ่มรายชื่อนักศึกษาตามคณะ
+Map<String, List<String>> groupByFaculty(List<Map<String, dynamic>> students) {
+  Map<String, List<String>> resultMap = {};
+
+  for (var s in students) {
+    String faculty = s["faculty"];
+    String name = s["name"];
+
+    // ถ้ายังไม่มี Key คณะนี้ใน Map ให้สร้าง List ว่างไว้ก่อน
+    if (!resultMap.containsKey(faculty)) {
+      resultMap[faculty] = [];
+    }
+    // เพิ่มชื่อนักศึกษาเข้าไปในคณะนั้นๆ
+    resultMap[faculty]!.add(name);
+  }
+
+  return resultMap;
+}
 
 
 ```
