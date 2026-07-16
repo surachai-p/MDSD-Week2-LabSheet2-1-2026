@@ -627,7 +627,113 @@ void main() {
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
 ```dart
-// บันทึกโค้ดในส่วนนี้
+String findTopStudentByFaculty(List students, String faculty) {
+  var facultyStudents =
+      students.where((s) => s["faculty"] == faculty).toList();
+
+  if (facultyStudents.isEmpty) {
+    return "ไม่พบข้อมูล";
+  }
+
+  facultyStudents.sort(
+      (a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  return facultyStudents.first["name"];
+}
+
+Map<String, List> groupByFaculty(List students) {
+  Map<String, List> groups = {};
+
+  for (var student in students) {
+    String faculty = student["faculty"];
+    groups.putIfAbsent(faculty, () => []);
+    groups[faculty]!.add(student);
+  }
+
+  return groups;
+}
+
+void main() {
+  List<Map<String, dynamic>> students = [
+    {"name": "สมชาย", "gpa": 3.75, "year": 3, "faculty": "วิศวกรรม"},
+    {"name": "สมหญิง", "gpa": 2.50, "year": 1, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศักดิ์", "gpa": 3.10, "year": 2, "faculty": "วิศวกรรม"},
+    {"name": "สมใจ", "gpa": 1.80, "year": 4, "faculty": "บริหาร"},
+    {"name": "สมปอง", "gpa": 3.50, "year": 2, "faculty": "วิทยาศาสตร์"},
+    {"name": "สมศรี", "gpa": 2.90, "year": 3, "faculty": "บริหาร"},
+  ];
+
+  // === where() ===
+  print("=== นักศึกษาที่ GPA >= 3.0 ===");
+  var honorStudents =
+      students.where((s) => (s["gpa"] as double) >= 3.0).toList();
+
+  for (var s in honorStudents) {
+    print("${s["name"]}: ${s["gpa"]}");
+  }
+
+  // === map() ===
+  print("\n=== รายงานนักศึกษา ===");
+  var report = students
+      .map((s) => "${s["name"]} (${s["faculty"]}) GPA: ${s["gpa"]}")
+      .toList();
+
+  report.forEach(print);
+
+  // === วิเคราะห์ GPA ===
+  List<double> gpas =
+      students.map((s) => s["gpa"] as double).toList();
+
+  double maxGpa = gpas.reduce((a, b) => a > b ? a : b);
+  double minGpa = gpas.reduce((a, b) => a < b ? a : b);
+  double avgGpa = gpas.reduce((a, b) => a + b) / gpas.length;
+
+  print("\n=== วิเคราะห์คะแนน ===");
+  print("GPA สูงสุด: $maxGpa");
+  print("GPA ต่ำสุด: $minGpa");
+  print("GPA เฉลี่ย: ${avgGpa.toStringAsFixed(2)}");
+
+  // === any() every() ===
+  bool anyFailing =
+      students.any((s) => (s["gpa"] as double) < 2.0);
+  bool allPassing =
+      students.every((s) => (s["gpa"] as double) >= 2.0);
+
+  print("มีนักศึกษาที่ GPA < 2.0 : $anyFailing");
+  print("ทุกคน GPA >= 2.0 : $allPassing");
+
+  // === เพิ่มจากการทดลอง ===
+  print("\n=== นักศึกษาคณะวิศวกรรม ===");
+  var engineeringStudents =
+      students.where((s) => s["faculty"] == "วิศวกรรม").toList();
+
+  for (var s in engineeringStudents) {
+    print("${s["name"]}: ${s["gpa"]}");
+  }
+
+  // ===== โจทย์ฝึกทำ 2 =====
+
+  print("\nนักศึกษา GPA สูงสุด คณะวิศวกรรม");
+  print(findTopStudentByFaculty(students, "วิศวกรรม"));
+
+  print("\n=== จัดกลุ่มตามคณะ ===");
+  var groups = groupByFaculty(students);
+
+  groups.forEach((faculty, list) {
+    print(faculty);
+    for (var student in list) {
+      print("  ${student["name"]} (${student["gpa"]})");
+    }
+  });
+
+  students.sort(
+      (a, b) => (b["gpa"] as double).compareTo(a["gpa"] as double));
+
+  print("\n=== GPA สูงสุด 3 อันดับแรก ===");
+  for (int i = 0; i < 3; i++) {
+    print("${i + 1}. ${students[i]["name"]} : ${students[i]["gpa"]}");
+  }
+}
 
 
 ```
