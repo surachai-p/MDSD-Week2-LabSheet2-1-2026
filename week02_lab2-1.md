@@ -1217,8 +1217,71 @@ void main() async {
 3. สร้าง `Stream<String>` ที่จำลองการส่ง Chat Message ทุก 1 วินาที เป็นเวลา 5 ครั้ง แล้วแสดงผลผ่าน `await for`
 
 **บันทึกผลการทดลอง: บันทึกโค้ดคำสั่งที่ได้**
+
 ```dart
 // บันทึกโค้ดในส่วนนี้
+
+import 'dart:async';
+
+// 1. คำนวณภาษีแบบอัตราก้าวหน้า
+Future<double> calculateTax(double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+
+  if (income <= 150000) {
+    return 0;
+  } else if (income <= 300000) {
+    return income * 0.05;
+  } else if (income <= 500000) {
+    return income * 0.10;
+  } else {
+    return income * 0.20;
+  }
+}
+
+// 2. จำลองการดึงข้อมูลรายได้ของผู้ใช้
+Future<double> getIncome(String name, double income) async {
+  await Future.delayed(Duration(milliseconds: 500));
+  print('ดึงข้อมูลรายได้ของ $name สำเร็จ');
+  return income;
+}
+
+// 3. สร้าง Stream จำลองการส่งข้อความ Chat
+Stream<String> chatMessages() async* {
+  for (int i = 1; i <= 5; i++) {
+    await Future.delayed(Duration(seconds: 1));
+    yield 'Chat Message $i';
+  }
+}
+
+void main() async {
+  // ดึงข้อมูลรายได้ 3 คนพร้อมกัน
+  List<double> incomes = await Future.wait([
+    getIncome('User 1', 120000),
+    getIncome('User 2', 250000),
+    getIncome('User 3', 600000),
+  ]);
+
+  // คำนวณภาษีแต่ละคน
+  double totalTax = 0;
+
+  for (int i = 0; i < incomes.length; i++) {
+    double tax = await calculateTax(incomes[i]);
+
+    print('User ${i + 1} รายได้: ${incomes[i]} บาท');
+    print('ภาษีที่ต้องจ่าย: ${tax.toStringAsFixed(2)} บาท');
+
+    totalTax += tax;
+  }
+
+  print('รวมภาษีทั้งหมด: ${totalTax.toStringAsFixed(2)} บาท');
+
+  // รับข้อความผ่าน Stream ด้วย await for
+  print('\n--- Chat Messages ---');
+
+  await for (String message in chatMessages()) {
+    print(message);
+  }
+}
 
 
 ```
@@ -1229,28 +1292,38 @@ void main() async {
 
 **ข้อ 1** อธิบายความแตกต่างระหว่าง `final` และ `const` พร้อมยกตัวอย่างกรณีที่ใช้แต่ละแบบ
 ```text
-
+final ใช้ประกาศตัวแปรที่กำหนดค่าได้เพียงครั้งเดียว โดยสามารถกำหนดค่าตอน Runtime ได้
+const ใช้ประกาศค่าคงที่ที่ต้องทราบค่าตั้งแต่ Compile Time และไม่สามารถเปลี่ยนแปลงได้
+final name = getUserName(); // กำหนดค่าตอน Runtime
+const pi = 3.14;            // ค่าคงที่
 
 ```
 **ข้อ 2** Named Parameters และ Positional Parameters ต่างกันอย่างไร? ควรเลือกใช้แบบไหนเมื่อไหร่?
 ```text
+Positional Parameters คือ การส่งค่าให้ฟังก์ชันตามลำดับตำแหน่งที่กำหนดไว้
+Named Parameters คือ การส่งค่าโดยระบุชื่อของ Parameter ทำให้ไม่จำเป็นต้องจำลำดับของค่า
 
 
 ```
 **ข้อ 3** Abstract Class และ Mixin มีจุดประสงค์ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบ
 ```text
-
+Abstract Class ใช้เป็นคลาสต้นแบบเพื่อกำหนดโครงสร้างและรูปแบบการทำงานให้คลาสลูกนำไปพัฒนาต่อ
+Mixin ใช้เพิ่มความสามารถหรือชุดคำสั่งให้กับหลายคลาส โดยไม่จำเป็นต้องสืบทอดจากคลาสเดียวกัน
 
 ```
 **ข้อ 4** จากการทดลอง 4.1 Sequential ใช้เวลาประมาณกี่ ms และ Parallel ใช้เวลาเท่าไหร่? อธิบายเหตุผลที่ Parallel เร็วกว่า และบอกกรณีที่ต้องใช้ Sequential แทน
 ```text
-
+- Sequential: ใช้เวลาประมาณ 1,500 ms
+- Parallel: ใช้เวลาประมาณ 500 ms
+Parallel ทำงานได้เร็วกว่า เพราะสามารถเริ่มทำงานหลาย Future พร้อมกันได้ โดยไม่ต้องรอให้งานหนึ่งเสร็จก่อนจึงเริ่มงานถัดไป
+ส่วน Sequential เหมาะกับกรณีที่งานต้องทำตามลำดับ เช่น การเข้าสู่ระบบก่อน แล้วจึงดึงข้อมูลผู้ใช้ หรือการบันทึกข้อมูลก่อนนำข้อมูลไปคำนวณต่อ
 
 ```
 **ข้อ 5** Future และ Stream ต่างกันอย่างไร? ยกตัวอย่างสถานการณ์ที่เหมาะกับแต่ละแบบจากการพัฒนา Mobile App จริงๆ
 ```text
-
-
+Future ใช้สำหรับจัดการงาน Asynchronous ที่ส่งผลลัพธ์กลับมาเพียงครั้งเดียวในอนาคต เช่น การเรียก API เพื่อเข้าสู่ระบบ หรือการโหลดข้อมูลโปรไฟล์ผู้ใช้
+Stream ใช้สำหรับจัดการข้อมูลที่ส่งเข้ามาหลายครั้งอย่างต่อเนื่อง เช่น การรับข้อความแชตแบบเรียลไทม์ หรือการติดตามตำแหน่ง GPS
+เหมาะกับงานที่ต้องการผลลัพธ์เพียงครั้งเดียว ส่วน Stream เหมาะกับงานที่ต้องรับข้อมูลหลายครั้งหรืออย่างต่อเนื่องตลอดเวลา
 ```
 ---
 
